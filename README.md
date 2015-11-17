@@ -828,6 +828,16 @@ or for Windows Phone (7/8):
 
     .\bin\test.ps1 wp8
 
+## running tests from ShellJS
+
+*EXPERIMENTAL*: To run tests using [ShellJS](http://documentup.com/shelljs/shelljs)/[CoffeeScript](http://coffeescript.org/):
+
+    coffee bin/test.coffee [android|ios|windows]
+
+**Prerequisite:** Development node module for [ShellJS](http://documentup.com/shelljs/shelljs) must be installed:
+
+    npm install
+
 # Adapters
 
 ## Lawnchair Adapter

@@ -38,5 +38,8 @@
   "bugs": {
     "url": "https://github.com/litehelpers/Cordova-sqlite-storage/issues"
   },
-  "homepage": "https://github.com/litehelpers/Cordova-sqlite-storage"
+  "homepage": "https://github.com/litehelpers/Cordova-sqlite-storage",
+  "devDependencies": {
+    "shelljs": "^0.5.3"
+  }
 }
