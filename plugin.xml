@@ -4,7 +4,7 @@
     id="com.brodysoft.sqlitePlugin"
     version="1.1.0"><!-- equals 0.8.2 of the upstream -->
 
-    <name>Cordova sqlite storage plugin (core version)</name>
+    <name>Brodysoft SQLitePlugin</name>
 
     <license>MIT</license>
 
