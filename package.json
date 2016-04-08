@@ -1,7 +1,7 @@
 {
   "name": "cordova-sqlite-ext",
-  "version": "0.9.0-prep",
-  "description": "Native interface to SQLite for PhoneGap/Cordova with extras",
+  "version": "0.9.0-ext-regexp-ci-test",
+  "description": "Native interface to SQLite for PhoneGap/Cordova (ext regexp ci test)",
   "cordova": {
     "id": "cordova-sqlite-ext",
     "platforms": [

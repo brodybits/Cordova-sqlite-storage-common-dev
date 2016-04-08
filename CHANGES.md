@@ -1,9 +1,32 @@
 # Changes
 
+<<<<<<< HEAD
 ## 0.9.0-prep
+=======
+## x.x.x-regexp-dev
+
+### x.x.x-common-dev
+
+- Support Windows 8.1/Windows Phone 8.1 along with Windows 10
+- Fix PCH issue with Debug Win32 UWP (Windows 10) build
+
+### cordova-sqlite-storage 1.2.0
+
+- Rename Lawnchair adapter to prevent clash with standard webkit-sqlite adapter
+- Support location: 'default' setting in openDatabase & deleteDatabase
+
+### cordova-sqlite-storage 0.8.5
+
+- More explicit iosDatabaseLocation option
+- iOS database location is now mandatory
+- Split-up of some more spec test scripts
+
+### cordova-sqlite-storage 0.8.2
+>>>>>>> regexp-src
 
 - TBD: Mark BREAKING CHANGES COMING to openDatabase parameters
 
+<<<<<<< HEAD
 NOTICE: `0.8.6` release was published to npm based on the wrong branch and is withdrawn, to be completely superseded by the `0.9.0` release.
 
 ## 0.8.4
@@ -11,6 +34,19 @@ NOTICE: `0.8.6` release was published to npm based on the wrong branch and is wi
 - Introduce Windows 10 UWP build (Windows 8.1 and Windows Phone 8.1 build disabled)
 
 ## 0.8.3
+=======
+## 0.x.x-regexp-dev
+
+### 0.8.x-common-dev
+
+- Introduce Windows 10 UWP build (Windows 8.1 and Windows Phone 8.1 build disabled)
+
+## 0.8.0-regexp-dev
+
+- _REGEXP support for Android and iOS integrated in this version branch_
+
+### 0.8.0-common-dev
+>>>>>>> regexp-src
 
 ### cordova-sqlite-storage 0.8.2
 
@@ -23,16 +59,22 @@ NOTICE: `0.8.6` release was published to npm based on the wrong branch and is wi
 - Fix pre-populated database for Windows 8.1(+)/Windows Phone 8.1(+)
 - Separate SQLiteConnectorDatabase class for Android
 - Renamed SQLiteProxy.js to sqlite-proxy.js in Windows version
+
+### cordova-sqlite-storage 0.8.0
+
 - Simple sql batch transaction function
 - Echo test function
 - Remove extra runInBackground: step from iOS version
 - Java source of Android version now using io.sqlc package
+<<<<<<< HEAD
 
 ## 0.8.0
 
 - Support REGEXP on Android using PCRE (8.37)
 - Support REGEXP for iOS included
 - Support pre-populated database for Windows "Universal" (BROKEN)
+=======
+>>>>>>> regexp-src
 
 ## 0.7.15-pre
 

@@ -2,9 +2,9 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="cordova-sqlite-ext"
-    version="0.9.0-prep">
+    version="0.9.0-ext-regexp-ci-test">
 
-    <name>Cordova sqlite storage plugin with extras</name>
+    <name>Cordova sqlite storage plugin (ext regexp ci test)</name>
 
     <license>MIT</license>
 
@@ -35,13 +35,13 @@
         <source-file src="src/android/io/sqlc/SQLiteConnectorDatabase.java" target-dir="src/io/liteglue"/>
 
         <!-- Android-sqlite-connector [jar]: -->
-        <source-file src="src/android/libs/sqlite-connector.jar" target-dir="libs"/>
+        <source-file src="src/external/libs/sqlite-connector.jar" target-dir="libs"/>
         <!-- Android-sqlite-connector native driver [native libs]: -->
-        <source-file src="src/android/libs/arm64-v8a/libsqlc-native-driver.so" target-dir="libs/arm64-v8a"/>
-        <source-file src="src/android/libs/armeabi/libsqlc-native-driver.so" target-dir="libs/armeabi"/>
-        <source-file src="src/android/libs/armeabi-v7a/libsqlc-native-driver.so" target-dir="libs/armeabi-v7a"/>
-        <source-file src="src/android/libs/x86/libsqlc-native-driver.so" target-dir="libs/x86"/>
-        <source-file src="src/android/libs/x86_64/libsqlc-native-driver.so" target-dir="libs/x86_64"/>
+        <source-file src="src/external/libs/arm64-v8a/libsqlc-native-driver.so" target-dir="libs/arm64-v8a"/>
+        <source-file src="src/external/libs/armeabi/libsqlc-native-driver.so" target-dir="libs/armeabi"/>
+        <source-file src="src/external/libs/armeabi-v7a/libsqlc-native-driver.so" target-dir="libs/armeabi-v7a"/>
+        <source-file src="src/external/libs/x86/libsqlc-native-driver.so" target-dir="libs/x86"/>
+        <source-file src="src/external/libs/x86_64/libsqlc-native-driver.so" target-dir="libs/x86_64"/>
 
     </platform>
 
@@ -53,11 +53,10 @@
             </feature>
         </config-file>
 
+        <!-- Note: the ios src is based off src/ios implicitly -->
         <header-file src="src/ios/SQLitePlugin.h" />
         <source-file src="src/ios/SQLitePlugin.m" />
-
-        <header-file src="src/common/sqlite3.h" />
-        <source-file src="src/common/sqlite3.c" />
+        <framework src="libsqlite3.dylib" />
 
     </platform>
 
@@ -67,17 +66,15 @@
             <merges target="" />
         </js-module>
 
-        <!-- SQLite3 JS module from SQLite3-Win-RT/SQLite3JS: -->
+        <!-- SQLite3 JS module from SQLite3-WinRT/SQLite3JS: -->
         <js-module src="src/windows/SQLite3-Win-RT/SQLite3JS/js/SQLite3.js" name="SQLite3">
             <merges target="" />
         </js-module>
 
         <!-- Thanks to AllJoyn-Cordova / cordova-plugin-alljoyn: -->
-        <framework src="src/windows/SQLite3-Win-RT/SQLite3/SQLite3.UWP/SQLite3.UWP.vcxproj" custom="true" type="projectReference" />
-        <!-- TBD (NOT supported by Visual Studio Express 2015):
-        <framework src="src/windows/SQLite3-Win-RT/SQLite3/SQLite3.Windows/SQLite3.Windows.vcxproj" custom="true" type="projectReference" target="windows" />
-        <framework src="src/windows/SQLite3-Win-RT/SQLite3/SQLite3.WindowsPhone/SQLite3.WindowsPhone.vcxproj" custom="true" type="projectReference" target="phone" />
-         -->
+        <framework src="src/windows/SQLite3-Win-RT/SQLite3/SQLite3.UWP/SQLite3.UWP.vcxproj" custom="true" type="projectReference" versions="10.*" />
+        <framework src="src/windows/SQLite3-Win-RT/SQLite3/SQLite3.Windows/SQLite3.Windows.vcxproj" custom="true" type="projectReference" target="windows" versions="8.1" />
+        <framework src="src/windows/SQLite3-Win-RT/SQLite3/SQLite3.WindowsPhone/SQLite3.WindowsPhone.vcxproj" custom="true" type="projectReference" target="phone" versions="8.1" />
 
     </platform>
 
