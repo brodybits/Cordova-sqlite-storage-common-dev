@@ -247,17 +247,21 @@
 
       return
 
+    # FUTURE TBD:
+    #SQLitePlugin::dispose = (success, error) ->
+    #  # ...
+    #  return
+
     SQLitePlugin::close = (success, error) ->
       if @dbname of @openDBs
         if txLocks[@dbname] && txLocks[@dbname].inProgress
-          # XXX TBD: wait for current tx then close (??)
+          # XXX FUTURE TBD: wait for current tx then close ??
           console.log 'cannot close: transaction is in progress'
           error newSQLError 'database cannot be closed while a transaction is in progress'
           return
 
         console.log 'CLOSE database: ' + @dbname
 
-        # XXX [BUG #209] closing one db handle disables other handles to same db
         delete @openDBs[@dbname]
 
         if txLocks[@dbname] then console.log 'closing db with transaction queue length: ' + txLocks[@dbname].queue.length
@@ -277,14 +281,24 @@
       # XXX TODO: better to capture the result, and report it once
       # the transaction has completely finished.
       # This would fix BUG #204 (cannot close db in db.executeSql() callback).
-      mysuccess = (t, r) -> if !!success then success r
-      myerror = (t, e) -> if !!error then error e
+
+      resultSet = null
+      errorResult = null
 
       myfn = (tx) ->
-        tx.addStatement(statement, params, mysuccess, myerror)
+        mysuccess = (t, r) -> resultSet = r
+
+        myerror = (t, e) ->
+          errorResult = e
+          return true
+
+        tx.addStatement statement, params, mysuccess, myerror
         return
 
-      @addTransaction new SQLitePluginTransaction(this, myfn, null, null, false, false)
+      txok = -> success resultSet
+      txerror = -> error errorResult
+
+      @addTransaction new SQLitePluginTransaction @, myfn, txerror, txok, false, false
       return
 
     SQLitePlugin::sqlBatch = (sqlStatements, success, error) ->

@@ -235,21 +235,27 @@
   };
 
   SQLitePlugin.prototype.executeSql = function(statement, params, success, error) {
-    var myerror, myfn, mysuccess;
-    mysuccess = function(t, r) {
-      if (!!success) {
-        return success(r);
-      }
-    };
-    myerror = function(t, e) {
-      if (!!error) {
-        return error(e);
-      }
-    };
+    var errorResult, myfn, resultSet, txerror, txok;
+    resultSet = null;
+    errorResult = null;
     myfn = function(tx) {
+      var myerror, mysuccess;
+      mysuccess = function(t, r) {
+        return resultSet = r;
+      };
+      myerror = function(t, e) {
+        errorResult = e;
+        return true;
+      };
       tx.addStatement(statement, params, mysuccess, myerror);
     };
-    this.addTransaction(new SQLitePluginTransaction(this, myfn, null, null, false, false));
+    txok = function() {
+      return success(resultSet);
+    };
+    txerror = function() {
+      return error(errorResult);
+    };
+    this.addTransaction(new SQLitePluginTransaction(this, myfn, txerror, txok, false, false));
   };
 
   SQLitePlugin.prototype.sqlBatch = function(sqlStatements, success, error) {

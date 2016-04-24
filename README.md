@@ -574,7 +574,7 @@ This will invalidate **all** handle access handle objects for the database that 
 db.close(successcb, errorcb);
 ```
 
-It is OK to close the database within a transaction callback but *NOT* within a statement callback. The following example is OK:
+It is OK to close the database within a transaction callback but *NOT* within a statement callback within a transaction. The following example is OK:
 
 ```Javascript
 db.transaction(function(tx) {
@@ -611,24 +611,22 @@ db.transaction(function(tx) {
 });
 ```
 
-**BUG:** It is currently NOT possible to close a database in a `db.executeSql` callback. For example:
+It is also possible to close a database within a `db.executeSql` callback. For example:
 
 ```Javascript
-// BROKEN DUE TO BUG:
 db.executeSql("SELECT LENGTH('tenletters') AS stringlength", [], function (res) {
   var stringlength = res.rows.item(0).stringlength;
   console.log('got stringlength: ' + res.rows.item(0).stringlength);
 
-  // BROKEN - this will trigger the error callback DUE TO BUG:
   db.close(function() {
-    console.log('database is closed ok');
+    console.log('database is closed OK');
   }, function(error) {
     console.log('ERROR closing database');
   });
 });
 ```
 
-**SECOND BUG:** When a database connection is closed, any queued transactions are left hanging. All pending transactions should be errored when a database connection is closed.
+**BUG:** When a database connection is closed, any queued transactions are left hanging. All pending transactions should be errored when a database connection is closed.
 
 **NOTE:** As described above, if multiple database access handle objects are opened for the same database and one database handle access object is closed, the database is no longer available for the other database handle objects. Possible workarounds:
 - It is still possible to open one or more new database handle objects on a database that has been closed.

@@ -415,21 +415,19 @@ var mytests = function() {
         });
         // ** */
 
-        // XXX TODO BROKEN [BUG #204]:
-        it(suiteName + ' REPRODUCE BUG: close DB in db.executeSql() callback', function (done) {
+        it(suiteName + ' close db in db.executeSql() callback', function (done) {
           var dbName = "Close-DB-in-db-executeSql-callback.db";
 
           openDatabase({name: dbName}, function (db) {
             db.executeSql("CREATE TABLE IF NOT EXISTS tt (test_data)", [], function() {
               db.close(function () {
-                // FUTURE TBD EXPECTED RESULT:
-                expect('Behavior changed - please update this test').toBe('--');
+                // EXPECTED RESULT:
                 expect(true).toBe(true);
                 done();
               }, function (error) {
-                // BUG REPRODUCED:
-                //expect(false).toBe(true);
-                //expect('CLOSE ERROR' + error).toBe('--');
+                // NOT EXPECTED:
+                expect(false).toBe(true);
+                expect('CLOSE ERROR' + error).toBe('--');
                 expect(true).toBe(true);
                 done();
               });

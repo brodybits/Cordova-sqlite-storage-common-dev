@@ -1,5 +1,9 @@
 # Changes
 
+## 1.2.2-0xxx-dev
+
+- Fix #204: close db in db.executeSql callback
+
 ## 1.2.1
 
 - Close Android SQLiteStatement after INSERT/UPDATE/DELETE
