@@ -250,9 +250,13 @@
       tx.addStatement(statement, params, mysuccess, myerror);
     };
     txok = function() {
-      return success(resultSet);
+      if (!!resultSet) {
+        return success(resultSet);
+      } else {
+        return error(newSQLError('Missing resultSet'));
+      }
     };
-    txerror = function() {
+    txerror = function(ignored) {
       return error(errorResult);
     };
     this.addTransaction(new SQLitePluginTransaction(this, myfn, txerror, txok, false, false));

@@ -295,8 +295,16 @@
         tx.addStatement statement, params, mysuccess, myerror
         return
 
-      txok = -> success resultSet
-      txerror = -> error errorResult
+      #txok = -> success resultSet
+      #txerror = -> error errorResult
+
+      txok = ->
+        if !!resultSet
+          success resultSet
+        else
+          error newSQLError 'Missing resultSet'
+
+      txerror = (ignored) -> error errorResult
 
       @addTransaction new SQLitePluginTransaction @, myfn, txerror, txok, false, false
       return
