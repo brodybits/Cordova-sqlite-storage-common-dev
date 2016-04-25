@@ -697,6 +697,63 @@
         delete SQLitePlugin::openDBs[args.path]
         cordova.exec success, error, "SQLitePlugin", "delete", [ args ]
 
+## Self test:
+
+    SelfTest =
+      DBNAME: '___$$$___litehelpers___$$$___test___$$$___.db'
+
+      start: (successcb, errorcb) ->
+        SQLiteFactory.deleteDatabase {name: SelfTest.DBNAME, location: 'default'},
+          (-> SelfTest.start2(successcb, errorcb)),
+          (-> SelfTest.start2(successcb, errorcb))
+
+      start2: (successcb, errorcb) ->
+        SQLiteFactory.openDatabase {name: SelfTest.DBNAME, location: 'default'}, (db) ->
+          db.transaction (tx) ->
+            tx.executeSql 'CREATE TABLE TestTable(TestColumn);'
+            tx.executeSql 'INSERT INTO TestTable (TestColumn) VALUES (?);', ['test-value']
+          , (populate_tx_err) ->
+            SelfTest.finishWithError errorcb, "Populate transaction error: #{populate_tx_err}"
+          , () ->
+            db.executeSql 'SELECT * FROM TestTable', [], (resutSet) ->
+              if !resutSet.rows
+                SelfTest.finishWithError errorcb, 'Missing resutSet.rows'
+                return
+
+              if !resutSet.rows.length
+                SelfTest.finishWithError errorcb, 'Missing resutSet.rows.length'
+                return
+
+              if resutSet.rows.length isnt 1
+                SelfTest.finishWithError errorcb,
+                  "Incorrect resutSet.rows.length value: #{resutSet.rows.length} (expected: 1)"
+                return
+
+              if !resutSet.rows.item(0).TestColumn
+                SelfTest.finishWithError errorcb,
+                  'Missing resutSet.rows.item(0).TestColumn'
+                return
+
+              if resutSet.rows.item(0).TestColumn isnt 'test-value'
+                SelfTest.finishWithError errorcb,
+                  "Incorrect resutSet.rows.item(0).TestColumn value: #{resutSet.rows.item(0).TestColumn} (expected: 'test-value')"
+                return
+
+              # CLEANUP & FINISH:
+              SQLiteFactory.deleteDatabase {name: SelfTest.DBNAME, location: 'default'}, successcb, (cleanup_err)->
+                SelfTest.finishWithError errorcb, "Cleanup error: #{cleanup_err}"
+
+            , (select_err) ->
+              SelfTest.finishWithError errorcb, "SELECT error: #{select_err}"
+
+        , (open_err) ->
+          SelfTest.finishWithError errorcb, "Open database error: #{open_err}"
+
+      finishWithError: (errorcb, message) ->
+        SQLiteFactory.deleteDatabase {name: SelfTest.DBNAME, location: 'default'}, ->
+          errorcb newSQLError message
+        , (err2)-> errorcb newSQLError "Cleanup error: #{err2} for error: #{message}"
+
 ## Exported API:
 
     root.sqlitePlugin =
@@ -714,6 +771,8 @@
           errorcb e
 
         cordova.exec okcb, errorcb, "SQLitePlugin", "echoStringValue", [{value:'test-string'}]
+
+      selfTest: SelfTest.start
 
       openDatabase: SQLiteFactory.openDatabase
       deleteDatabase: SQLiteFactory.deleteDatabase
