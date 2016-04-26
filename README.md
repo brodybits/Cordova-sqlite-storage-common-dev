@@ -69,6 +69,8 @@ Some other projects by [@brodybits](https://github.com/brodybits):
   - Pre-populated database (Android/iOS/Windows)
 - Amazon Fire-OS is dropped due to lack of support by Cordova. Android version should be used to deploy to Fire-OS 5.0(+) devices. For reference: [cordova/cordova-discuss#32 (comment)](https://github.com/cordova/cordova-discuss/issues/32#issuecomment-167021676)
 - Windows version is in an alpha state:
+  - XXX TBD Windows 8.1/Windows Phone 8.1 build disabled due to certain build issues
+  - XXX (probably fixed): multiple updates with key scenario
   - Issue with UNICODE `\u0000` character (same as `\0`)
   - No background processing (for future consideration)
   - In addition, problems with the Windows version have been reported in case of a Cordova project using a Visual Studio template/extension instead of Cordova/PhoneGap CLI or `plugman`
