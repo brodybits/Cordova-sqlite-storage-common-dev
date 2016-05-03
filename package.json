@@ -34,6 +34,6 @@
   },
   "homepage": "https://github.com/litehelpers/cordova-sqlite-ext",
   "dependencies": {
-    "cordova-sqlite-ext-deps": "0.3.1"
+    "cordova-sqlite-ext-deps": "https://github.com/brodybits/cordova-sqlite-ext-deps-dev#0.3.2-cbtest"
   }
 }
