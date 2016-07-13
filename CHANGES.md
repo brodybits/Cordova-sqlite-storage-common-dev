@@ -1,5 +1,10 @@
 # Changes
 
+### cordova-sqlite-storage 1.4.6-pre0
+
+- doc: add ISSUE_TEMPLATE.md
+- other doc fixes
+
 ### cordova-sqlite-storage 1.4.5
 
 - Log/error message fixes; remove extra qid from internal JSON interface

@@ -28,3 +28,9 @@
 - Using SQLite3-WinRT C++ classes and SQLite3JS (Javascript part) by @doo (doo GmbH)
 - Visual C++ build files for Windows 8.1, Windows Phone 8.1, and Windows 10 UWP by @brodybits (with some help from Visual Studio Express 2013)
 - Thanks to @AllJoyn-Cordova for idea how to integrate Windows 8.1/Windows Phone 8.1 Visual C++ projects in plugin.xml
+
+## Documentation
+
+- README.md originally based on iOS version by @davibe (Davide Bertola) and @joenoon (Joe Noon)
+- Maintained by @brodybits
+- Sample by @Mikejo5000 (Mike Jones) of Microsoft

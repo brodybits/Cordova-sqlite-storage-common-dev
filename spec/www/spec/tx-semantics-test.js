@@ -544,9 +544,12 @@ var mytests = function() {
             tx.executeSql('DROP TABLE IF EXISTS ExtraTestTable4');
             tx.executeSql('DROP TABLE IF EXISTS ExtraTestTable5');
             tx.executeSql('DROP TABLE IF EXISTS ExtraTestTable6');
+            tx.executeSql('DROP TABLE IF EXISTS AlterTestTable');
 
-            tx.executeSql('CREATE TABLE IF NOT EXISTS test_table (data)');
+            tx.executeSql('CREATE TABLE test_table (data)');
             tx.executeSql('INSERT INTO test_table VALUES (?)', ['first']);
+
+            tx.executeSql('CREATE TABLE AlterTestTable (FirstColumn)');
           }, function () {}, function () {
             db.readTransaction(function (tx) {
               tx.executeSql('SELECT * from test_table', [], function (tx, res) {
@@ -648,6 +651,48 @@ var mytests = function() {
                   db.readTransaction(function (tx) {
                     tx.executeSql('; ; CREATE TABLE ExtraTestTable6 (data)');
                   }, checkDone, fail);
+                },
+                function () {
+                  db.readTransaction(function (tx) {
+                    tx.executeSql('ALTER TABLE AlterTestTable ADD COLUMN NewColumn');
+                  }, function(e) {
+                    // CORRECT
+                    if (!isWebSql) expect('Plugin FIXED, please update this test').toBe('--');
+                    checkDone();
+                  }, function() {
+                    // BUG from #502: IGNORED for Plugin ONLY:
+                    if (!isWebSql) return checkDone(); // (returns undefined)
+                    expect(false).toBe(true);
+                    fail();
+                  });
+                },
+                function () {
+                  db.readTransaction(function (tx) {
+                    tx.executeSql('REINDEX');
+                  }, function(e) {
+                    // CORRECT
+                    if (!isWebSql) expect('Plugin FIXED, please update this test').toBe('--');
+                    checkDone();
+                  }, function() {
+                    // BUG: IGNORED for Plugin ONLY:
+                    if (!isWebSql) return checkDone(); // (returns undefined)
+                    expect(false).toBe(true);
+                    fail();
+                  });
+                },
+                function () {
+                  db.readTransaction(function (tx) {
+                    tx.executeSql('REPLACE INTO test_table VALUES ("another")');
+                  }, function(e) {
+                    // CORRECT
+                    if (!isWebSql) expect('Plugin FIXED, please update this test').toBe('--');
+                    checkDone();
+                  }, function() {
+                    // BUG: IGNORED for Plugin ONLY:
+                    if (!isWebSql) return checkDone(); // (returns undefined)
+                    expect(false).toBe(true);
+                    fail();
+                  });
                 },
               ];
               for (var i = 0; i < tasks.length; i++) {
