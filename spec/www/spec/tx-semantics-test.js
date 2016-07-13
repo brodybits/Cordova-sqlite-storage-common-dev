@@ -655,44 +655,17 @@ var mytests = function() {
                 function () {
                   db.readTransaction(function (tx) {
                     tx.executeSql('ALTER TABLE AlterTestTable ADD COLUMN NewColumn');
-                  }, function(e) {
-                    // CORRECT
-                    if (!isWebSql) expect('Plugin FIXED, please update this test').toBe('--');
-                    checkDone();
-                  }, function() {
-                    // BUG from #502: IGNORED for Plugin ONLY:
-                    if (!isWebSql) return checkDone(); // (returns undefined)
-                    expect(false).toBe(true);
-                    fail();
-                  });
+                  }, checkDone, fail);
                 },
                 function () {
                   db.readTransaction(function (tx) {
                     tx.executeSql('REINDEX');
-                  }, function(e) {
-                    // CORRECT
-                    if (!isWebSql) expect('Plugin FIXED, please update this test').toBe('--');
-                    checkDone();
-                  }, function() {
-                    // BUG: IGNORED for Plugin ONLY:
-                    if (!isWebSql) return checkDone(); // (returns undefined)
-                    expect(false).toBe(true);
-                    fail();
-                  });
+                  }, checkDone, fail);
                 },
                 function () {
                   db.readTransaction(function (tx) {
                     tx.executeSql('REPLACE INTO test_table VALUES ("another")');
-                  }, function(e) {
-                    // CORRECT
-                    if (!isWebSql) expect('Plugin FIXED, please update this test').toBe('--');
-                    checkDone();
-                  }, function() {
-                    // BUG: IGNORED for Plugin ONLY:
-                    if (!isWebSql) return checkDone(); // (returns undefined)
-                    expect(false).toBe(true);
-                    fail();
-                  });
+                  }, checkDone, fail);
                 },
               ];
               for (var i = 0; i < tasks.length; i++) {

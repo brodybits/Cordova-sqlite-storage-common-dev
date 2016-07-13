@@ -1,7 +1,8 @@
 # Changes
 
-### cordova-sqlite-storage 1.4.6-pre0
+### cordova-sqlite-storage 1.4.6-pre1
 
+- Fix readTransaction to reject ALTER, REINDEX, and REPLACE operations
 - doc: add ISSUE_TEMPLATE.md
 - other doc fixes
 
