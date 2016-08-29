@@ -103,6 +103,7 @@ var mytests = function() {
               if (isWebSql || !(isAndroid || isWindows || isWP8))
                 strictEqual(error.code, 5, "error.code === SQLException.SYNTAX_ERR (5)");
               //equal(error.message, "Request failed: insert into test_table (data) VALUES ,123", "error.message");
+              expect(error.message).toMatch(/syntax error/);
               start();
 
               // We want this error to fail the entire transaction
@@ -116,7 +117,7 @@ var mytests = function() {
         });
 
         test_it(suiteName + "constraint violation", function() {
-          if (isWindows) pending('BROKEN for Windows'); // XXX TODO
+          //if (isWindows) pending('BROKEN for Windows'); // XXX TODO
           //if (isWindowsPhone_8_1) pending('BROKEN for Windows Phone 8.1'); // XXX TODO
 
           var db = openDatabase("Constraint-violation-test.db", "1.0", "Demo", DEFAULT_SIZE);
@@ -145,6 +146,11 @@ var mytests = function() {
                 ok(!!error['code'], "valid error.code exists");
 
               ok(error.hasOwnProperty('message'), "error.message exists");
+              if (isWebSql && !(isAndroid || isWindows || isWP8))
+                expect(error.message).toMatch(/const*aint fail/);
+              else
+                expect(error.message).toMatch(/constraint fail/);
+
               //strictEqual(error.code, 6, "error.code === SQLException.CONSTRAINT_ERR (6)");
               //equal(error.message, "Request failed: insert into test_table (data) VALUES (?),123", "error.message");
               start();
