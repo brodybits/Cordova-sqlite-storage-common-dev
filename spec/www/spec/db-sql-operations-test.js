@@ -32,27 +32,20 @@ function start(n) {
 var isWindows = /Windows /.test(navigator.userAgent); // Windows
 var isAndroid = !isWindows && /Android/.test(navigator.userAgent);
 
-// NOTE: In the common storage-master branch there is no difference between the
-// default implementation and implementation #2. But the test will also apply
-// the androidLockWorkaround: 1 option in the case of implementation #2.
-var scenarioList = [
+// NOTE: In certain versions such as Cordova-sqlcipher-adapter there is
+// no difference between the default implementation and implementation #2.
+// But the test will also specify the androidLockWorkaround: 1 option
+// in case of implementation #2 (also ignored by Cordova-sqlcipher-adapter).
+var pluginScenarioList = [
   isAndroid ? 'Plugin-implementation-default' : 'Plugin',
-  'HTML5',
   'Plugin-implementation-2'
 ];
 
-var scenarioCount = (!!window.hasWebKitBrowser) ? (isAndroid ? 3 : 2) : 1;
+var pluginScenarioCount = isAndroid ? 2 : 1;
 
 var mytests = function() {
 
-  describe('Plugin: plugin-specific sql test(s)', function() {
-
-    var pluginScenarioList = [
-      isAndroid ? 'Plugin-implementation-default' : 'Plugin',
-      'Plugin-implementation-2'
-    ];
-
-    var pluginScenarioCount = isAndroid ? 2 : 1;
+  describe('Plugin: plugin-specific sql operations test(s)', function() {
 
     for (var i=0; i<pluginScenarioCount; ++i) {
 
@@ -93,6 +86,101 @@ var mytests = function() {
           return window.sqlitePlugin.openDatabase(dbopts, okcb, errorcb);
         }
 
+        it(suiteName + 'Inline db.executeSql US-ASCII String manipulation test with null parameter list', function(done) {
+          var db = openDatabase("Inline-db-sql-US-ASCII-string-test-with-null-parameter-list.db", "1.0", "Demo", DEFAULT_SIZE);
+          expect(db).toBeDefined();
+
+          db.executeSql("SELECT UPPER('Some US-ASCII text') AS uppertext", null, function(res) {
+            expect(res.rows.item(0).uppertext).toBe("SOME US-ASCII TEXT");
+
+            db.close(done, done);
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'Inline db.executeSql US-ASCII String manipulation test with empty ([]) parameter list', function(done) {
+          var db = openDatabase("Inline-db-sql-US-ASCII-string-test-with-empty-parameter-list.db", "1.0", "Demo", DEFAULT_SIZE);
+          expect(db).toBeDefined();
+
+          db.executeSql("SELECT UPPER('Some US-ASCII text') AS uppertext", [], function(res) {
+            expect(res.rows.item(0).uppertext).toBe("SOME US-ASCII TEXT");
+
+            db.close(done, done);
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'Inline db.executeSql US-ASCII String manipulation test with undefined parameter list', function(done) {
+          var db = openDatabase("Inline-db-sql-US-ASCII-string-test-with-undefined-parameter-list.db", "1.0", "Demo", DEFAULT_SIZE);
+          expect(db).toBeDefined();
+
+          db.executeSql("SELECT UPPER('Some US-ASCII text') AS uppertext", undefined, function(res) {
+            expect(res.rows.item(0).uppertext).toBe("SOME US-ASCII TEXT");
+
+            db.close(done, done);
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'Inline db.executeSql US-ASCII String manipulation test with parameters=false', function(done) {
+          var db = openDatabase("Inline-db-sql-US-ASCII-string-test-with-parameters-equals-false.db", "1.0", "Demo", DEFAULT_SIZE);
+          expect(db).toBeDefined();
+
+          db.executeSql("SELECT UPPER('Some US-ASCII text') AS uppertext", false, function(res) {
+            expect(res.rows.item(0).uppertext).toBe("SOME US-ASCII TEXT");
+
+            db.close(done, done);
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'Inline db.executeSql US-ASCII String manipulation test with parameters=true', function(done) {
+          var db = openDatabase("Inline-db-sql-US-ASCII-string-test-with-parameters-equals-true.db", "1.0", "Demo", DEFAULT_SIZE);
+          expect(db).toBeDefined();
+
+          db.executeSql("SELECT UPPER('Some US-ASCII text') AS uppertext", true, function(res) {
+            expect(res.rows.item(0).uppertext).toBe("SOME US-ASCII TEXT");
+
+            db.close(done, done);
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'Multi-row INSERT with parameters in db.executeSql test', function(done) {
+          var db = openDatabase('Multi-row-INSERT-with-parameters-in-db-sql-test.db');
+
+          db.executeSql('DROP TABLE IF EXISTS TestTable;');
+          db.executeSql('CREATE TABLE TestTable (x,y)');
+
+          var check1 = false;
+          db.executeSql('INSERT INTO TestTable VALUES (?,?),(?,?)', ['a',1,'b',2], function(rs) {
+            expect(rs).toBeDefined();
+            expect(rs.insertId).toBeDefined();
+            expect(rs.insertId).toBe(2);
+            if (!(isAndroid && isImpl2))
+              expect(rs.rowsAffected).toBe(2);
+
+            check1 = true;
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            done();
+          });
+
+          db.executeSql('SELECT * FROM TestTable', [], function(rs2) {
+            // EXPECTED SELECT RESULT:
+            expect(rs2).toBeDefined();
+            expect(rs2.rows.length).toBe(2);
+            expect(rs2.rows.item(0).x).toBe('a');
+            expect(rs2.rows.item(0).y).toBe(1);
+            expect(rs2.rows.item(1).x).toBe('b');
+            expect(rs2.rows.item(1).y).toBe(2);
+            expect(check1).toBe(true);
+            done();
+          }, function(error) {
+            // NOT EXPECTED (SELECT):
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            done();
+          });
+        }, MYTIMEOUT);
+
         test_it(suiteName + "Multiple db.executeSql string result test", function() {
           // NOTE: this test checks that for db.executeSql(), the result callback is
           // called exactly once, with the proper result:
@@ -127,7 +215,38 @@ var mytests = function() {
           db.executeSql("select upper('second') as uppertext", [], okcb);
         });
 
+        it(suiteName + 'db.executeSql working in db.executeSql success callback', function(done) {
+          var db = openDatabase('db-sql-in-db-sql-success-callback-test.db');
+
+          db.executeSql('SELECT UPPER(?) AS uppertext', ['First'], function(rs) {
+            // FIRST EXPECTED RESULT:
+            expect(rs).toBeDefined();
+            expect(rs.rows.length).toBe(1);
+            expect(rs.rows.item(0).uppertext).toBe('FIRST');
+
+            db.executeSql('SELECT UPPER(?) AS uppertext', ['Second'], function(rs) {
+              // SECOND EXPECTED RESULT:
+              expect(rs).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).uppertext).toBe('SECOND');
+              done();
+            }, function(error) {
+              // NOT EXPECTED (SECOND):
+              expect(false).toBe(true);
+              expect(error.message).toBe('--');
+              done();
+            });
+
+          }, function(error) {
+            // NOT EXPECTED (FIRST):
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            done();
+          });
+        }, MYTIMEOUT);
+
       });
+
     }
 
   });
@@ -180,7 +299,7 @@ var mytests = function() {
           return window.sqlitePlugin.openDatabase(dbopts, okcb, errorcb);
         }
 
-        it(suiteName + "Multiple db.executeSql error result test", function(done) {
+        it(suiteName + 'Multiple db.executeSql error result test (check error codes & basic error message pattern)', function(done) {
           // NOTE: this test checks that for db.executeSql(), the error result
           // callback is called exactly once, with the proper result:
           var db = openDatabase("Multiple-DB-sql-error-result-test.db", "1.0", "Demo", DEFAULT_SIZE);
@@ -191,9 +310,13 @@ var mytests = function() {
           db.executeSql("SELCT upper('first') AS uppertext", [], function() {
             // NOT EXPECTED:
             expect(false).toBe(true);
-          }, function(e) {
-            expect(e).toBeDefined();
-            // FUTURE TBD check error fields
+          }, function(error) {
+            // EXPECTED RESULT 1:
+            expect(error).toBeDefined();
+            expect(error.code).toBeDefined();
+            expect(error.message).toBeDefined();
+            expect(error.code).toBe((!isWindows && !isWP8) ? 5 : 0); // (Windows/WP8 plugin BROKEN: INCORRECT code)
+            expect(error.message).toMatch(/syntax error/);
 
             // CHECK that this was not called before
             expect(error_result_count).toBe(0);
@@ -204,9 +327,29 @@ var mytests = function() {
           db.executeSql("SELECT uper('second') as uppertext", [], function() {
             // NOT EXPECTED:
             expect(false).toBe(true);
-          }, function(e) {
-            expect(e).toBeDefined();
-            // FUTURE TBD check error fields
+          }, function(error) {
+            // EXPECTED RESULT 2:
+            expect(error).toBeDefined();
+            expect(error).toBeDefined();
+            expect(error.code).toBeDefined();
+            expect(error.message).toBeDefined();
+
+            // INCORRECT error.code - should be 1: DATABASE_ERR
+            // ("not covered by any other error code")
+            // ref: https://www.w3.org/TR/webdatabase/#dom-sqlerror-code-1
+            // WebKit Web SQL, iOS plugin, & default Android implementation all report 5 (SYNTAX_ERR)
+            // Android implementation 2 (using built-in AOSP database classes) as well
+            // as Windows/WP8 report 0 (UNKNOWN_ERR)
+            if (!isWindows && !isWP8 && !(isAndroid && isImpl2))
+              expect(error.code).toBe(5);
+
+            // BROKEN (INCONSISTENT) on Windows/WP8:
+            if (!isWindows && !isWP8)
+              expect(error.message).toMatch(/no such function: uper/);
+
+            // BROKEN (INCONSISTENT) on Windows/WP8:
+            if (isWindows || isWP8)
+              expect(error.message).toMatch(/--/);
 
             expect(error_result_count).toBe(1);
             ++error_result_count;
@@ -214,7 +357,64 @@ var mytests = function() {
             // and finish this test:
             done();
           });
-        });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'db.executeSql working in db.executeSql error callback', function(done) {
+          var db = openDatabase('db-sql-in-db-sql-error-callback-test.db');
+
+          db.executeSql('SLCT 1', [], function(rs) {
+            // NOT EXPECTED:
+            expect(true).toBe(false);
+            done();
+          }, function(error) {
+            // FIRST EXPECTED RESULT:
+            expect(error).toBeDefined();
+            expect(error.code).toBeDefined();
+            expect(error.message).toBeDefined();
+            expect(error.code).toBe((!isWindows && !isWP8) ? 5 : 0); // (Windows/WP8 plugin BROKEN: INCORRECT code)
+            expect(error.message).toMatch(/syntax error/);
+
+            db.executeSql('SELECT UPPER(?) AS uppertext', ['Test'], function(rs) {
+              // SECOND EXPECTED RESULT:
+              expect(rs).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).uppertext).toBe('TEST');
+              done();
+            }, function(error) {
+              // NOT EXPECTED (SECOND):
+              expect(false).toBe(true);
+              expect(error.message).toBe('--');
+              done();
+            });
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'TBD: db.executeSql with INSERT statement list (PLUGIN BROKEN with possible parameter data loss)', function(done) {
+          var db = openDatabase('db-sql-insert-statement-list.db');
+
+          db.executeSql('DROP TABLE IF EXISTS tt');
+          db.executeSql('CREATE TABLE tt (data)');
+          db.executeSql('INSERT INTO tt VALUES (?); INSERT INTO tt VALUES (2)', [1], function(rs) {
+            expect(rs).toBeDefined();
+            db.executeSql('SELECT * FROM tt', [], function(rs) {
+              // TBD ACTUAL RESULT [PLUGIN BROKEN with possible data loss]:
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).data).toBe(1);
+              db.close(done, done);
+            }, function(error) {
+              // TBD [NOT EXPECTED]:
+              expect(false).toBe(true);
+              expect(error.message).toBe('--');
+              db.close(done, done);
+            })
+          }, function(error) {
+            expect(false).toBe(true);
+            expect(error).toBeDefined();
+            db.close(done, done);
+          })
+        }, MYTIMEOUT);
 
       });
     }
@@ -223,16 +423,9 @@ var mytests = function() {
 
   describe('Plugin: more plugin-specific test(s)', function() {
 
-    var pluginScenarioList = [
-      isAndroid ? 'Plugin-implementation-default' : 'Plugin',
-      'Plugin-implementation-2'
-    ];
-
-    var pluginScenarioCount = isAndroid ? 2 : 1;
-
     for (var i=0; i<pluginScenarioCount; ++i) {
 
-      describe(pluginScenarioList[i] + ': more db.executeSql test(s)', function() {
+      describe(pluginScenarioList[i] + ': db.executeSql PRAGMA test(s)', function() {
         var scenarioName = pluginScenarioList[i];
         var suiteName = scenarioName + ': ';
         var isImpl2 = (i === 1);

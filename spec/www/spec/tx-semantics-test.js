@@ -7,7 +7,6 @@ var DEFAULT_SIZE = 5000000; // max to avoid popup in safari/ios
 // FUTURE TODO replace in test(s):
 function ok(test, desc) { expect(test).toBe(true); }
 function equal(a, b, desc) { expect(a).toEqual(b); } // '=='
-function strictEqual(a, b, desc) { expect(a).toBe(b); } // '==='
 
 // XXX TODO REFACTOR OUT OF OLD TESTS:
 var wait = 0;
@@ -33,30 +32,31 @@ function start(n) {
 var isWindows = /Windows /.test(navigator.userAgent); // Windows 8.1/Windows Phone 8.1/Windows 10
 var isAndroid = !isWindows && /Android/.test(navigator.userAgent);
 
-// NOTE: In the core-master branch there is no difference between the default
-// implementation and implementation #2. But the test will also apply
-// the androidLockWorkaround: 1 option in the case of implementation #2.
+// NOTE: In certain versions such as Cordova-sqlcipher-adapter there is
+// no difference between the default implementation and implementation #2.
+// But the test will also specify the androidLockWorkaround: 1 option
+// in case of implementation #2 (also ignored by Cordova-sqlcipher-adapter).
 var scenarioList = [
   isAndroid ? 'Plugin-implementation-default' : 'Plugin',
   'HTML5',
   'Plugin-implementation-2'
 ];
 
-var scenarioCount = (!!window.hasWebKitBrowser) ? (isAndroid ? 3 : 2) : 1;
+var scenarioCount = (!!window.hasBrowserWithWebSQL) ? (isAndroid ? 3 : 2) : 1;
 
 var mytests = function() {
 
   for (var i=0; i<scenarioCount; ++i) {
 
-    describe(scenarioList[i] + ': tx semantics test(s)', function() {
+    describe(scenarioList[i] + ': tx success/error semantics test(s)', function() {
       var scenarioName = scenarioList[i];
       var suiteName = scenarioName + ': ';
       var isWebSql = (i === 1);
-      var isOldImpl = (i === 2);
+      var isImpl2 = (i === 2);
 
       // NOTE: MUST be defined in function scope, NOT outer scope:
       var openDatabase = function(name, ignored1, ignored2, ignored3) {
-        if (isOldImpl) {
+        if (isImpl2) {
           return window.sqlitePlugin.openDatabase({
             // prevent reuse of database from default db implementation:
             name: 'i2-'+name,
@@ -72,7 +72,9 @@ var mytests = function() {
         }
       }
 
-        it(suiteName + 'Simple tx sql order test', function(done) {
+      describe(scenarioList[i] + ': Simple tx sql order success/error test(s)', function() {
+
+        it(suiteName + 'Simple tx sql order success test', function(done) {
           // This test shows that executeSql statements run in intermediate callback
           // are executed _after_ executeSql statements that were queued before
 
@@ -167,7 +169,11 @@ var mytests = function() {
           });
         }, MYTIMEOUT);
 
-        test_it(suiteName + 'transaction test: check rowsAffected [intermediate]', function () {
+      });
+
+      describe(scenarioList[i] + ': nested tx success test(s)', function() {
+
+        test_it(suiteName + 'nested tx: check rowsAffected [intermediate]', function () {
           var db = openDatabase("RowsAffected", "1.0", "Demo", DEFAULT_SIZE);
 
           stop();
@@ -176,13 +182,17 @@ var mytests = function() {
             tx.executeSql('DROP TABLE IF EXISTS characters');
             tx.executeSql('CREATE TABLE IF NOT EXISTS characters (name, creator, fav tinyint(1))');
             tx.executeSql('UPDATE characters SET name = ?', ['foo'], function (tx, res) {
-              equal(res.rowsAffected, 0, 'nothing updated');
+              expect(res.rowsAffected).toBe(0); // (nothing updated)
+
               tx.executeSql('DELETE from characters WHERE name = ?', ['foo'], function (tx, res) {
-                equal(res.rowsAffected, 0, 'nothing deleted');
+                expect(res.rowsAffected).toBe(0); // (nothing deleted)
+
                 tx.executeSql('UPDATE characters SET name = ?', ['foo'], function (tx, res) {
-                  equal(res.rowsAffected, 0, 'nothing updated');
+                  expect(res.rowsAffected).toBe(0); // (nothing updated)
+
                   tx.executeSql('DELETE from characters', [], function (tx, res) {
-                    equal(res.rowsAffected, 0, 'nothing deleted');
+                    expect(res.rowsAffected).toBe(0); // (nothing deleted)
+
                     test2(tx);
                   });
                 });
@@ -192,17 +202,23 @@ var mytests = function() {
 
           function test2(tx) {
             tx.executeSql('INSERT INTO characters VALUES (?,?,?)', ['Sonic', 'Sega', 0], function (tx, res) {
-              equal(res.rowsAffected, 1);
+              expect(res.rowsAffected).toBe(1);
+
               tx.executeSql('INSERT INTO characters VALUES (?,?,?)', ['Mario', 'Nintendo', 0], function (tx, res) {
-                equal(res.rowsAffected, 1);
+                expect(res.rowsAffected).toBe(1);
+
                 tx.executeSql('INSERT INTO characters VALUES (?,?,?)', ['Samus', 'Nintendo', 0], function (tx, res) {
-                  equal(res.rowsAffected, 1);
+                  expect(res.rowsAffected).toBe(1);
+
                   tx.executeSql('UPDATE characters SET fav=1 WHERE creator=?', ['Nintendo'], function (tx, res) {
-                    equal(res.rowsAffected, 2);
+                    expect(res.rowsAffected).toBe(2);
+
                     tx.executeSql('UPDATE characters SET fav=1 WHERE creator=?', ['Konami'], function (tx, res) {
-                      equal(res.rowsAffected, 0);
+                      expect(res.rowsAffected).toBe(0);
+
                       tx.executeSql('UPDATE characters SET fav=1', [], function (tx, res) {
-                        equal(res.rowsAffected, 3);
+                        expect(res.rowsAffected).toBe(3);
+
                         test3(tx);
                       });
                     });
@@ -214,17 +230,22 @@ var mytests = function() {
 
           function test3(tx) {
             tx.executeSql('INSERT INTO characters VALUES (?,?,?)', ['Mega Man', 'Capcom', 0], function (tx, res) {
-              equal(res.rowsAffected, 1);
+              expect(res.rowsAffected).toBe(1);
+
               tx.executeSql('UPDATE characters SET fav=?, name=? WHERE creator=?;', [1, 'X', 'Capcom'], function (tx, res) {
-                equal(res.rowsAffected, 1);
+                expect(res.rowsAffected).toBe(1);
+
                 tx.executeSql('UPDATE characters SET fav=? WHERE (creator=? OR creator=?)', [1, 'Capcom', 'Nintendo'], function (tx, res) {
-                  equal(res.rowsAffected, 3);
+                  expect(res.rowsAffected).toBe(3);
+
                   tx.executeSql('DELETE FROM characters WHERE name="Samus";', [], function (tx, res) {
-                    equal(res.rowsAffected, 1);
+                    expect(res.rowsAffected).toBe(1);
+
                     tx.executeSql('UPDATE characters SET fav=0,name=?', ["foo"], function (tx, res) {
-                      equal(res.rowsAffected, 3);
+                      expect(res.rowsAffected).toBe(3);
+
                       tx.executeSql('DELETE FROM characters', [], function (tx, res) {
-                        equal(res.rowsAffected, 3);
+                        expect(res.rowsAffected).toBe(3);
 
                         start();
                       });
@@ -240,7 +261,7 @@ var mytests = function() {
           })
         });
 
-        test_it(suiteName + 'test rowsAffected [advanced]', function () {
+        test_it(suiteName + 'nested tx: test rowsAffected [advanced]', function () {
           var db = openDatabase("RowsAffectedAdvanced", "1.0", "Demo", DEFAULT_SIZE);
 
           stop();
@@ -262,17 +283,19 @@ var mytests = function() {
                       ' SET fav=(SELECT fav FROM companies WHERE name=?)' +
                       ' WHERE creator=?';
                   tx.executeSql(sql, ['Sega', 'Sega'], function (tx, res) {
-                    equal(res.rowsAffected, 2);
+                    expect(res.rowsAffected).toBe(2);
+
                     // query with 2 subqueries
                     var sql = 'UPDATE characters ' +
                         ' SET fav=(SELECT fav FROM companies WHERE name=?),' +
                         ' creator=(SELECT name FROM companies WHERE name=?)' +
                         ' WHERE creator=?';
                     tx.executeSql(sql, ['Sega', 'Sega', 'Sega'], function (tx, res) {
-                      equal(res.rowsAffected, 2);
+                      expect(res.rowsAffected).toBe(2);
+
                       // knockoffs shall be ignored:
                       tx.executeSql('INSERT or IGNORE INTO characters VALUES (?,?,?)', ['Sonic', 'knockoffs4you', 0], function (tx, res) {
-                        equal(res.rowsAffected, 0);
+                        expect(res.rowsAffected).toBe(0);
 
                         start();
                       }, function(tx, err) {
@@ -288,9 +311,7 @@ var mytests = function() {
           });
         });
 
-        // FUTURE TODO: fix these tests to follow the Jasmine style and move into a separate spec file:
-
-        test_it(suiteName + "nested transaction test", function() {
+        test_it(suiteName + 'basic nested transaction test (check results)', function() {
 
           var db = openDatabase("Database2", "1.0", "Demo", DEFAULT_SIZE);
 
@@ -316,8 +337,8 @@ var mytests = function() {
                 console.log("res.rows.length: " + res.rows.length + " -- should be 1");
                 console.log("res.rows.item(0).cnt: " + res.rows.item(0).cnt + " -- should be 1");
 
-                equal(res.rows.length, 1, "res rows length");
-                equal(res.rows.item(0).cnt, 1, "select count");
+                expect(res.rows.length).toBe(1); // (res rows length)
+                expect(res.rows.item(0).cnt).toBe(1); // (select count)
 
                 start();
               });
@@ -328,7 +349,9 @@ var mytests = function() {
 
         });
 
-      describe(suiteName + 'transaction callback semantics test(s)', function() {
+      });
+
+      describe(suiteName + 'transaction callback success/error semantics test(s)', function() {
 
         function withTestTable(func) {
           //stop();
@@ -342,7 +365,7 @@ var mytests = function() {
           });
         };
 
-        test_it(suiteName + "transaction encompasses all callbacks", function() {
+        test_it(suiteName + "transaction encompasses all callbacks in case SQL success handler throws an exception", function() {
           stop(); // wait until callback with the final count before signalling end of test
 
           var db = openDatabase("tx-all-callbacks.db", "1.0", "Demo", DEFAULT_SIZE);
@@ -355,7 +378,7 @@ var mytests = function() {
             db.transaction(function(tx) {
               tx.executeSql('INSERT INTO test_table (data, data_num) VALUES (?,?)', ['test', 100], function(tx, res) {
                 tx.executeSql("SELECT count(*) as cnt from test_table", [], function(tx, res) {
-                  equal(res.rows.item(0).cnt, 1, "did insert row");
+                  expect(res.rows.item(0).cnt).toBe(1); // (did insert row)
                   throw new Error("deliberately aborting transaction");
                 });
               });
@@ -363,13 +386,14 @@ var mytests = function() {
               if (!isWebSql) equal(error.message, "deliberately aborting transaction");
               db.transaction(function(tx) {
                 tx.executeSql("select count(*) as cnt from test_table", [], function(tx, res) {
-                  equal(res.rows.item(0).cnt, 0, "final count shows we rolled back");
+                  expect(res.rows.item(0).cnt).toBe(0); // (final count shows we rolled back)
 
                   start();
                 });
               });
             }, function() {
-              ok(false, "transaction succeeded but wasn't supposed to");
+              // NOT EXPECTED (transaction succeeded but wasn't supposed to)
+              expect(false).toBe(true);
 
               start();
             });
@@ -424,13 +448,13 @@ var mytests = function() {
 
               db.transaction(function(tx) {
                 tx.executeSql("select count(*) as cnt from test_table", [], function(tx, res) {
-                  equal(res.rows.item(0).cnt, 0, "should have rolled back");
+                  expect(res.rows.item(0).cnt).toBe(0); // (should have rolled back)
 
                   start();
                 });
               });
             }, function() {
-              ok(false, "not supposed to succeed");
+              // NOT EXPECTED (not supposed to succeed)
               start();
             });
           });
@@ -493,23 +517,27 @@ var mytests = function() {
                 });
               });
             }, function() {
-              ok(false, "transaction was supposed to fail");
+              // NOT EXPECTED (transaction was supposed to fail)
+              expect(false).toBe(true);
 
               start();
             });
           });
         });
-        
-        test_it(suiteName + "executeSql fails outside transaction", function() {
+
+        test_it(suiteName + 'executeSql throws if transaction is finished', function() {
           withTestTable(function(db) {
-            expect(4);
-            ok(!!db, "db ok");            
+            //expect(4);
+            expect(db).toBeDefined();
+
             var txg;
             stop(2);
+
             db.transaction(function(tx) {
-              ok(!!tx, "tx ok");
+              expect(tx).toBeDefined(); // (tx ok)
               txg = tx;
-              tx.executeSql("insert into test_table (data, data_num) VALUES (?,?)", ['test', null], function(tx, res) {
+
+              tx.executeSql("INSERT INTO test_table (data, data_num) VALUES (?,?)", ['test', null], function(tx, res) {
                 expect(res).toBeDefined();
                 expect(res.rowsAffected).toEqual(1);
               });
@@ -527,11 +555,13 @@ var mytests = function() {
                 ok(!!err.message, "error had valid message");
               }
               start(1);
-            });            
+            });
           });
         });
 
       });
+
+      describe(suiteName + 'readTransaction semantics (error) test(s)', function() {
 
         it(suiteName + "readTransaction should fail & report error on modification", function(done) {
           var db = openDatabase("tx-readonly-test.db", "1.0", "Demo", DEFAULT_SIZE);
@@ -675,7 +705,11 @@ var mytests = function() {
           });
         });
 
-        test_it(suiteName + ' test callback order', function () {
+      });
+
+      describe(suiteName + 'tx callback order test(s)', function() {
+
+        test_it(suiteName + ' test callback order: should not block', function () {
           stop();
           var db = openDatabase("Database-Callback-Order", "1.0", "Demo", DEFAULT_SIZE);
           var blocked = true;
@@ -692,6 +726,8 @@ var mytests = function() {
           });
           blocked = false;
         });
+
+      });
 
     });
   }
