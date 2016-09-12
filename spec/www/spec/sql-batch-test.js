@@ -5,12 +5,13 @@ var MYTIMEOUT = 12000;
 var DEFAULT_SIZE = 5000000; // max to avoid popup in safari/ios
 
 var isWP8 = /IEMobile/.test(navigator.userAgent); // Matches WP(7/8/8.1)
-var isWindows = /Windows /.test(navigator.userAgent); // Windows (8.1)
+var isWindows = /Windows /.test(navigator.userAgent); // Windows 8.1/Windows Phone 8.1/Windows 10
 var isAndroid = !isWindows && /Android/.test(navigator.userAgent);
 
-// NOTE: In the common storage-master branch there is no difference between the
-// default implementation and implementation #2. But the test will also apply
-// the androidLockWorkaround: 1 option in the case of implementation #2.
+// NOTE: In certain versions such as Cordova-sqlcipher-adapter there is
+// no difference between the default implementation and implementation #2.
+// But the test will also specify the androidLockWorkaround: 1 option
+// in case of implementation #2 (also ignored by Cordova-sqlcipher-adapter).
 var pluginScenarioList = [
   isAndroid ? 'Plugin-implementation-default' : 'Plugin',
   'Plugin-implementation-2'
@@ -18,7 +19,6 @@ var pluginScenarioList = [
 
 var pluginScenarioCount = isAndroid ? 2 : 1;
 
-// simple tests:
 var mytests = function() {
 
   for (var i=0; i<pluginScenarioCount; ++i) {
@@ -65,7 +65,7 @@ var mytests = function() {
           });
         }, MYTIMEOUT);
 
-        it(suiteName + 'batch sql with syntax error', function(done) {
+        it(suiteName + 'batch sql with syntax error (check error code & basic error message pattern, INCONSISTENT on Windows)', function(done) {
           var db = openDatabase('batch-sql-syntax-error-test.db', '1.0', 'Test', DEFAULT_SIZE);
 
           expect(db).toBeDefined();
@@ -76,12 +76,21 @@ var mytests = function() {
             'CRETE TABLE MyTable (SampleColumn)',
             [ 'INSERT INTO MyTable VALUES (?)', ['test-value'] ],
           ], function() {
-            // not expected:
-            expect(true).toBe(false);
+            // NOT EXPECTED:
+            expect(false).toBe(true);
             done();
           }, function(error) {
-            // expected:
-            expect(true).toBe(true);
+            // EXPECTED RESULT:
+            expect(error).toBeDefined();
+            expect(error.code).toBeDefined();
+            expect(error.message).toBeDefined();
+
+            // Check syntax error code/message:
+            if (!isWindows && !isWP8) // BROKEN (INCONSISTENT) on Windows
+              expect(error.code).toBe(5);
+            if (!isWindows && !isWP8) // BROKEN (INCONSISTENT) on Windows:
+              expect(error.message).toMatch(/syntax error/);
+
             done();
           });
         }, MYTIMEOUT);
@@ -99,20 +108,29 @@ var mytests = function() {
               // syntax error below:
               [ 'INSRT INTO MyTable VALUES (?)', 'test-value' ]
             ], function() {
-              // not expected:
+              // NOT EXPECTED:
               expect(true).toBe(false);
               done();
             }, function(error) {
-              // check integrity:
+              // EXPECTED RESULT, check integrity:
+              expect(error).toBeDefined();
               db.executeSql('SELECT * FROM MyTable', [], function (res) {
                 expect(res.rows.item(0).SampleColumn).toBe('test-value');
-                done();
+                db.close(done, done);
+
+              }, function(error) {
+                // NOT EXPECTED:
+                expect(false).toBe(true);
+                expect(error.message).toBe('--');
+                db.close(done, done);
               });
             });
 
           }, function(error) {
-            expect(true).toBe(false);
-            done();
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            db.close(done, done);
           });
         }, MYTIMEOUT);
 

@@ -7,7 +7,6 @@ var DEFAULT_SIZE = 5000000; // max to avoid popup in safari/ios
 // FUTURE TODO replace in test(s):
 function ok(test, desc) { expect(test).toBe(true); }
 function equal(a, b, desc) { expect(a).toEqual(b); } // '=='
-function strictEqual(a, b, desc) { expect(a).toBe(b); } // '==='
 
 // XXX TODO REFACTOR OUT OF OLD TESTS:
 var wait = 0;
@@ -31,14 +30,13 @@ function start(n) {
 }
 
 var isWP8 = /IEMobile/.test(navigator.userAgent); // Matches WP(7/8/8.1)
-var isWindows = /Windows /.test(navigator.userAgent); // Windows (8.1)
+var isWindows = /Windows /.test(navigator.userAgent); // Windows 8.1/Windows Phone 8.1/Windows 10
 var isAndroid = !isWindows && /Android/.test(navigator.userAgent);
-var isIE = isWindows || isWP8;
-var isWebKit = !isIE; // TBD [Android or iOS]
 
-// NOTE: In the core-master branch there is no difference between the default
-// implementation and implementation #2. But the test will also apply
-// the androidLockWorkaround: 1 option in the case of implementation #2.
+// NOTE: In certain versions such as Cordova-sqlcipher-adapter there is
+// no difference between the default implementation and implementation #2.
+// But the test will also specify the androidLockWorkaround: 1 option
+// in case of implementation #2 (also ignored by Cordova-sqlcipher-adapter).
 var pluginScenarioList = [
   isAndroid ? 'Plugin-implementation-default' : 'Plugin',
   'Plugin-implementation-2'
@@ -741,7 +739,7 @@ var mytests = function() {
 
         test_it(suiteName + ' database.close (immediately after open) calls its success callback', function () {
           // XXX POSSIBLY BROKEN on iOS due to current background processing implementation
-          if (!(isAndroid || isIE)) pending('POSSIBLY BROKEN on iOS (background processing implementation)');
+          if (!isAndroid && !isWindows && !isWP8) pending('POSSIBLY BROKEN on iOS (background processing implementation)');
 
           // asynch test coming up
           stop(1);
@@ -954,7 +952,7 @@ var mytests = function() {
         test_it(suiteName + ' close then re-open (2x) allows subsequent queries to run', function () {
           // asynch test coming up
           stop(1);
-        
+
           var dbName = "Database-Close-and-Reopen";
 
           openDatabase({name: dbName, location: 0}, function (db) {
@@ -976,7 +974,7 @@ var mytests = function() {
                     }, function(tx) {
                       // close on transaction success not while executing
                       // or commit will fail
-                      db.close(); 
+                      db.close();
                     });
                   }, function (error) {
                     ok(false, error.message);
@@ -1045,7 +1043,7 @@ var mytests = function() {
         test_it(suiteName + ' immediate close, then delete then re-open allows subsequent queries to run', function () {
 
           // XXX POSSIBLY BROKEN on iOS due to current background processing implementation
-          if (!(isAndroid || isIE)) pending('POSSIBLY BROKEN on iOS (background processing implementation)');
+          if (!isAndroid && !isWindows && !isWP8) pending('POSSIBLY BROKEN on iOS (background processing implementation)');
 
           var dbName = "Immediate-close-delete-Reopen.db";
 
@@ -1190,7 +1188,7 @@ var mytests = function() {
 
         test_it(suiteName + ' repeatedly open and close database faster (5x)', function () {
           // XXX CURRENTLY BROKEN on iOS due to current background processing implementation
-          if (!(isAndroid || isIE)) pending('CURRENTLY BROKEN on iOS (background processing implementation)');
+          if (!isAndroid && !isWindows && !isWP8) pending('POSSIBLY BROKEN on iOS (background processing implementation)');
 
           var dbName = "repeatedly-open-and-close-faster-5x.db";
 
@@ -1311,7 +1309,7 @@ var mytests = function() {
         // Needed to support some large-scale applications:
         test_it(suiteName + ' repeatedly open and delete database faster (5x)', function () {
           // XXX CURRENTLY BROKEN on iOS due to current background processing implementation
-          if (!(isAndroid || isIE)) pending('CURRENTLY BROKEN on iOS (background processing implementation)');
+          if (!isAndroid && !isWindows && !isWP8) pending('POSSIBLY BROKEN on iOS (background processing implementation)');
 
           var dbName = "repeatedly-open-and-delete-faster-5x.db";
 

@@ -2,7 +2,8 @@
 
 ### cordova-sqlite-storage 1.4.8-pre2
 
-- Fix reporting of SQL processing errors in Windows version
+- _Include proper SQL error code on Android in certain cases (TBD KNOWN DEVIATIONS)_
+- Fix reporting of SQL processing errors in Windows version _(KNOWN DEVIATIONS remaining: incorrect error code; inconsistent error message)_
 
 ### cordova-sqlite-storage 1.4.7
 
