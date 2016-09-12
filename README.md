@@ -123,7 +123,8 @@ See the [Sample section](#sample) for a sample with a more detailed explanation.
 - Amazon Fire-OS is dropped due to lack of support by Cordova. Android version should be used to deploy to Fire-OS 5.0(+) devices. For reference: [cordova/cordova-discuss#32 (comment)](https://github.com/cordova/cordova-discuss/issues/32#issuecomment-167021676)
 - Windows version includes a customized version of the performant C++ [doo / SQLite3-WinRT](https://github.com/doo/SQLite3-WinRT) component and has the following limitations:
   - Issue with UNICODE `\u0000` character (same as `\0`)
-  - Incorrect error code and inconsistent error message in error callbacks
+  - Missing error code and inconsistent error message in error callbacks
+  - Issue with emojis and other 4-octet UTF-8 characters (not stored correctly)
   - No background processing
 - FTS3, FTS4, and R-Tree support is tested working OK in this version (for all target platforms in this version branch Android/iOS/Windows)
 - Android is supported back to SDK 10 (a.k.a. Gingerbread, Android 2.3.3); support for older versions is available upon request.
@@ -301,9 +302,17 @@ In case you get stuck with something please read through the [support](#support)
 - Known issues with handling of certain ASCII/UNICODE characters as described below.
 - This plugin supports some non-standard features as described below.
 - It is possible to request a SQL statement list such as "SELECT 1; SELECT 2" within a single SQL statement string, however the plugin will only execute the first statement and silently ignore the others ref: [litehelpers / Cordova-sqlite-storage#551](https://github.com/litehelpers/Cordova-sqlite-storage/issues/551)
-- Boolean `true` and `false` values are handled by converting them to the "true" and "false" TEXT string values, which is the same behavior as WebKit Web SQL on Android and iOS. This does not seem to be 100% correct as discussed in [litehelpers / Cordova-sqlite-storage#545](https://github.com/litehelpers/Cordova-sqlite-storage/issues/545)
-- Certain errors such as CREATE VIRTUAL TABLE USING bogus module are reported with error code 5 (SYNTAX_ERR) on Android and iOS. (This also happens to be the case for WebKit Web SQL on Android and iOS.)
-- SQL errors are reported with error code 0 on Windows.
+- Boolean `true` and `false` values are handled by converting them to the "true" and "false" TEXT string values, same as WebKit Web SQL on Android and iOS. This does not seem to be 100% correct as discussed in [litehelpers / Cordova-sqlite-storage#545](https://github.com/litehelpers/Cordova-sqlite-storage/issues/545)
+- Certain errors such as CREATE VIRTUAL TABLE USING bogus module are reported with error code 5 (SYNTAX_ERR) on Android and iOS. This happens to be the case for WebKit Web SQL (Android/iOS).
+- SQL errors are reported with error code 0 on Windows. In certain cases SQL errors are reported with error code 0 on Android in case the built-in Android database is used (using the `androidDatabaseImplementation: 2` setting in `window.sqlitePlugin.openDatabase`).
+- The plugin handles invalid SQL parameter arguments such as `false`, `true`, or a string as if there were no arguments while Web SQL would throw an exception.
+
+### Other differences from WebKit Web SQL implementations
+
+- Android and iOS WebKit Web SQL implementations recover from an error if an error handler returns a "falsey" value (ref: <https://developer.mozilla.org/en-US/docs/Glossary/Falsy>) such as `undefined`, `null`, `0`, etc. (or is missing a `return` statement) while this plugin *only* recovers from an error when the error handler returns `false`. Discussion for reference: [litehelpers/Cordova-sqlite-storage#232](http://github.com/litehelpers/Cordova-sqlite-storage/issues/232)
+- In certain cases the plugin reports error code 1 (DATABASE_ERR) while WebKit Web SQL (Android/iOS) would incorrectly report 5 (SYNTAX_ERR). In case of a SQL error handler that does not recover the transaction, WebKit Web SQL (Android/iOS) would incorrectly report error code 0 while the plugin would report the same error code as in the SQL error handler. (In case of an error with no SQL error handler then Android/iOS WebKit Web SQL would report the same error code that would have been reported in the SQL error hander.)
+- SQL error messages are inconsistent on Windows.
+- There are some other differences in the SQL error messages reported by WebKit Web SQL and this plugin.
 
 <!-- END Deviations -->
 
@@ -312,6 +321,7 @@ In case you get stuck with something please read through the [support](#support)
 - iOS version does not support certain rapidly repeated open-and-close or open-and-delete test scenarios due to how the implementation handles background processing
 - As described below, auto-vacuum is NOT enabled by default.
 - It is possible to request a SQL statement list such as "SELECT 1; SELECT 2" within a single SQL statement string, however the plugin will only execute the first statement and silently ignore the others ref: [litehelpers / Cordova-sqlite-storage#551](https://github.com/litehelpers/Cordova-sqlite-storage/issues/551)
+- The Android and Windows versions do not always handle four-byte UTF-8 characters emoji characters such as `\u1F603` (SMILING FACE, MOUTH OPEN) correctly. It is sometimes possible to store and retrieve such characters but certain operations hex conversions do not work properly with the default [Android-sqlite-connector](https://github.com/liteglue/Android-sqlite-connector) database implementation. It is suspected that such characters would be stored incorrectly in the Android and Windows versions. This is not an issue in case the built-in Android database is used (using the `androidDatabaseImplementation: 2` setting in `window.sqlitePlugin.openDatabase`)
 - INSERT statement that affects multiple rows (due to SELECT cause or using TRIGGER(s), for example) does not report proper rowsAffected on Android in case the built-in Android database is used (using the `androidDatabaseImplementation: 2` setting in `window.sqlitePlugin.openDatabase`)
 - Memory issue observed when adding a large number of records due to the JSON implementation which is improved in [litehelpers / Cordova-sqlite-evcore-extbuild-free](https://github.com/litehelpers/Cordova-sqlite-evcore-extbuild-free) (available with GPL or commercial license options)
 - Infinity (positive or negative) values are not supported (known to be broken on Android, may cause a crash on iOS ref: [litehelpers/Cordova-sqlite-storage#405](https://github.com/litehelpers/Cordova-sqlite-storage/issues/405))
@@ -499,7 +509,7 @@ To verify that both the Javascript and native part of this plugin are installed 
 window.sqlitePlugin.echoTest(successCallback, errorCallback);
 ```
 
-To verify that this plugin is able to open a database (named `___$$$___litehelpers___$$$___test___$$$___.db`), execute the CRUD (create, read, update, and delete) operations, and clean it up properly:
+To verify that this plugin is able to open a database, (named `___$$$___litehelpers___$$$___test___$$$___.db`), execute the CRUD (create, read, update, and delete) operations, and clean it up properly:
 
 ```js
 window.sqlitePlugin.selfTest(successCallback, errorCallback);

@@ -599,9 +599,11 @@ var mytests = function() {
 
         }, MYTIMEOUT);
 
-      if (!isWebSql) // NOT supported by Web SQL:
-        it(suiteName + 'Multi-row INSERT with parameters - NOT supported by Web SQL', function(done) {
-          if (isWP8) pending('NOT SUPPORTED for WP8');
+      describe(scenarioList[i] + ': NON-standard Multi-row INSERT with parameters [post-sqlite 3.6 feature]', function() {
+
+        it(suiteName + 'Multi-row INSERT with parameters - DEVIATION (post-sqlite 3.6 feature) [SQLResultSet.rowsAffected BROKEN for AOSP android.database (androidDatabaseImplementation:2)]', function(done) {
+          if (isWP8) pending('SKIP: NOT SUPPORTED for WP8');
+          if (isAndroid && isWebSql) pending('SKIP for Android Web SQL'); // FUTURE TBD (??)
 
           var db = openDatabase('Multi-row-INSERT-with-parameters-test.db', '1.0', 'Test', DEFAULT_SIZE);
 
@@ -609,9 +611,17 @@ var mytests = function() {
             tx.executeSql('DROP TABLE IF EXISTS TestTable;');
             tx.executeSql('CREATE TABLE TestTable (x,y);');
 
-            tx.executeSql('INSERT INTO TestTable VALUES (?,?),(?,?)', ['a',1,'b',2], function(ignored1, ignored2) {
+            tx.executeSql('INSERT INTO TestTable VALUES (?,?),(?,?)', ['a',1,'b',2], function(ignored1, rs1) {
+              expect(rs1).toBeDefined();
+              expect(rs1.insertId).toBeDefined();
+              expect(rs1.insertId).toBe(2);
+              if (!(isAndroid && isImpl2)) // [SQLResultSet.rowsAffected BROKEN for AOSP android.database]
+                expect(rs1.rowsAffected).toBe(2); // [BROKEN for AOSP android.database]
+              else
+                expect(rs1.rowsAffected).toBe(1); // [ACTUAL (BROKEN) for AOSP android.database]
+
               tx.executeSql('SELECT * FROM TestTable', [], function(ignored, resultSet) {
-                // EXPECTED: CORRECT RESULT:
+                // EXPECTED (CORRECT RESULT):
                 expect(resultSet.rows.length).toBe(2);
                 expect(resultSet.rows.item(0).x).toBe('a');
                 expect(resultSet.rows.item(0).y).toBe(1);
@@ -622,43 +632,47 @@ var mytests = function() {
                 (isWebSql) ? done() : db.close(done, done);
               });
             });
-          }, function(e) {
-            // ERROR RESULT (NOT EXPECTED):
+          }, function(error) {
+            // NOT EXPECTED (ERROR RESULT):
             expect(false).toBe(true);
-            expect(e).toBeDefined();
 
             // Close (plugin only) & finish:
             (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
+      });
 
-      if (!isWebSql) // NOT covered by Web SQL standard:
-        it(suiteName + 'INSERT statement list (NOT covered by Web SQL standard) - Plugin BROKEN', function(done) {
+      describe(scenarioList[i] + ': NON-standard INSERT statement list in SQLTransaction.executeSql [REJECTED by WebKit Web SQL]', function() {
+
+        it(suiteName + 'INSERT statement list (NOT covered by Web SQL standard) - ' +
+           (isWebSql ? 'Web SQL ERROR' : 'DEVIATION - PLUGIN BROKEN with possible data loss'), function(done) {
           var db = openDatabase('INSERT-statement-list-test.db', '1.0', 'Test', DEFAULT_SIZE);
 
           db.transaction(function(tx) {
             tx.executeSql('DROP TABLE IF EXISTS TestList;');
             tx.executeSql('CREATE TABLE TestList (data);');
 
-            // NOT supported by Web SQL, plugin BROKEN:
+            // REJECTED by [WebKit] Web SQL; PLUGIN BROKEN with possible data loss
+            // FUTURE TBD: REJECT BY PLUGIN
             tx.executeSql('INSERT INTO TestList VALUES (1); INSERT INTO TestList VALUES(2);');
-          }, function(e) {
-            // ERROR RESULT (expected for Web SQL):
+          }, function(error) {
+            // ERROR RESULT (expected for Web SQL)
             if (!isWebSql)
               expect('Plugin behavior changed').toBe('--');
-            expect(e).toBeDefined();
+            expect(error).toBeDefined();
 
             // Close (plugin only) & finish:
             (isWebSql) ? done() : db.close(done, done);
           }, function() {
+            // TBD ACTUAL RESULT [PLUGIN BROKEN with possible data loss]:
             if (isWebSql)
               expect('Unexpected result for Web SQL').toBe('--');
 
             db.transaction(function(tx2) {
               tx2.executeSql('SELECT * FROM TestList', [], function(ignored, resultSet) {
-                // CORRECT RESULT for plugin:
+                // CORRECT RESULT:
                 //expect(resultSet.rows.length).toBe(2);
-                // ACTUAL RESULT for plugin:
+                // ACTUAL RESULT for PLUGIN [BROKEN with possible parameter data loss]:
                 expect(resultSet.rows.length).toBe(1);
 
                 // FIRST ROW CORRECT:
@@ -673,33 +687,7 @@ var mytests = function() {
           });
         }, MYTIMEOUT);
 
-      if (!isWebSql) // NOT covered by Web SQL standard:
-        it(suiteName + 'First result from SELECT statement list - NOT covered by Web SQL standard', function(done) {
-          var db = openDatabase('First-result-from-SELECT-statement-list-test.db', '1.0', 'Test', DEFAULT_SIZE);
-
-          db.transaction(function(tx) {
-            // NOT supported by Web SQL:
-            tx.executeSql('SELECT UPPER (?) AS upper1; SELECT 1', ['Test string'], function(ignored, resultSet) {
-              if (isWebSql)
-                expect('Unexpected result for Web SQL').toBe('--');
-
-              expect(resultSet.rows.length).toBe(1); // ACTUAL RESULT for plugin
-              expect(resultSet.rows.item(0).upper1).toBe('TEST STRING');
-
-              // Close (plugin only) & finish:
-              (isWebSql) ? done() : db.close(done, done);
-            }, function(ignored, e) {
-              // ERROR RESULT (expected for Web SQL):
-              if (!isWebSql)
-                expect('Plugin behavior changed').toBe('--');
-
-              expect(e).toBeDefined();
-
-              // Close (plugin only) & finish:
-              (isWebSql) ? done() : db.close(done, done);
-            });
-          });
-        }, MYTIMEOUT);
+      });
 
         it(suiteName + 'BLOB inserted as a literal', function(done) {
           var db = openDatabase('Literal-BLOB-INSERT-test.db', '1.0', 'Test', DEFAULT_SIZE);
@@ -730,8 +718,8 @@ var mytests = function() {
           });
         }, MYTIMEOUT);
 
-        it(suiteName + 'INSERT with SELECT', function(done) {
-          if (isAndroid && isImpl2) pending('BUG with android.database implementation');
+        it(suiteName + 'INSERT multiple rows from with SELECT [SQLResultSet.rowsAffected BROKEN for AOSP android.database (androidDatabaseImplementation:2)]', function(done) {
+          //if (isAndroid && isImpl2) pending('BUG with android.database implementation');
 
           var db = openDatabase('INSERT-with-SELECT-test.db', '1.0', 'Test', DEFAULT_SIZE);
 
@@ -751,8 +739,11 @@ var mytests = function() {
               expect(rs1).toBeDefined();
               expect(rs1.insertId).toBeDefined();
               expect(rs1.rowsAffected).toBeDefined();
-              if (!(isAndroid && isImpl2))
-                expect(rs1.rowsAffected).toBe(2);
+              expect(rs1.insertId).toBe(2);
+              if (!(isAndroid && isImpl2)) // [SQLResultSet.rowsAffected BROKEN for AOSP android.database]
+                expect(rs1.rowsAffected).toBe(2); // [BROKEN for AOSP android.database]
+              else
+                expect(rs1.rowsAffected).toBe(1); // [ACTUAL (BROKEN) for AOSP android.database]
 
               tx.executeSql('SELECT * FROM tt2', [], function(ignored, rs2) {
                 // EXPECTED: CORRECT RESULT:
@@ -821,6 +812,8 @@ var mytests = function() {
             (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
+
+      describe(suiteName + 'ALTER TABLE tests', function() {
 
         it(suiteName + 'ALTER TABLE ADD COLUMN test', function(done) {
           var dbname = 'ALTER-TABLE-ADD-COLUMN-test.db';
@@ -935,6 +928,10 @@ var mytests = function() {
           }
         }, MYTIMEOUT);
 
+      });
+
+      describe(suiteName + 'Infinity, FUTURE TODO: NaN test(s)', function() {
+
         // FUTURE TODO more +/- INFINITY, NAN tests
 
         it(suiteName + "SELECT abs('9e999') (Infinity) result test", function(done) {
@@ -960,6 +957,8 @@ var mytests = function() {
 
           });
         }, MYTIMEOUT);
+
+      });
 
     });
 
