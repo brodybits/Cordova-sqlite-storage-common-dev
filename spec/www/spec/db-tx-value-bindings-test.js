@@ -55,11 +55,11 @@ var mytests = function() {
       var scenarioName = scenarioList[i];
       var suiteName = scenarioName + ': ';
       var isWebSql = (i === 1);
-      var isOldImpl = (i === 2);
+      var isImpl2 = (i === 2);
 
       // NOTE: MUST be defined in function scope, NOT outer scope:
       var openDatabase = function(name, ignored1, ignored2, ignored3) {
-        if (isOldImpl) {
+        if (isImpl2) {
           return window.sqlitePlugin.openDatabase({
             // prevent reuse of database from default db implementation:
             name: 'i2-'+name,
@@ -76,6 +76,52 @@ var mytests = function() {
       }
 
       describe(suiteName + 'transaction column value bindings semantics test(s)', function() {
+
+        // NOTE: emojis and other 4-octet UTF-8 characters apparently not stored properly
+        // Android-sqlite-connector/Windows/WP(8)
+        it(suiteName + 'INSERT TEXT string with emoji [\\u1F603 SMILING FACE (MOUTH OPEN)], SELECT the data, and check' +
+           ((isWebSql && (isWindows || isWP8 || (isAndroid && isImpl2))) ?
+            ' [BROKEN: INCORRECT SELECT HEX(data) result on Android-sqlite-connector/Windows/WP(8)]' : ''), function(done) {
+
+          var db = openDatabase('INSERT-emoji-and-check.db', '1.0', 'Demo', DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+            tx.executeSql('DROP TABLE IF EXISTS test_table');
+            tx.executeSql('CREATE TABLE IF NOT EXISTS test_table (data)', [], function(ignored1, ignored2) {
+
+              tx.executeSql('INSERT INTO test_table VALUES (?)', ['@\uD83D\uDE03!'], function(tx, res) {
+
+                expect(res).toBeDefined();
+                expect(res.rowsAffected).toBe(1);
+
+                tx.executeSql('SELECT * FROM test_table', [], function(tx, res) {
+                  var row = res.rows.item(0);
+
+                  // Full object check:
+                  expect(row).toEqual({data: '@\uD83D\uDE03!'});
+                  // Check individual members:
+                  expect(row.data).toBe('@\uD83D\uDE03!');
+
+                  tx.executeSql('SELECT HEX(data) AS hexvalue FROM test_table', [], function(tx, res) {
+                    // BROKEN: INCORRECT value Android-sqlite-connector/Windows/WP(8)
+                    //if (!isWebSql && !isWindows && !isWP8 && !(isAndroid && isImpl2))
+                      expect(res.rows.item(0).hexvalue).toBe('40F09F988321');
+
+                    // Close (plugin only) & finish:
+                    (isWebSql) ? done() : db.close(done, done);
+                  });
+
+                });
+              });
+            });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('---');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
+          });
+        }, MYTIMEOUT);
 
         it(suiteName + "all columns should be included in result set (including 'null' columns)", function(done) {
 
@@ -281,88 +327,6 @@ var mytests = function() {
           });
         });
 
-        it(suiteName + "executeSql with not enough parameters", function(done) {
-          var db = openDatabase("not-enough-parameters.db", "1.0", "Demo", DEFAULT_SIZE);
-
-          db.transaction(function(tx) {
-            tx.executeSql('DROP TABLE IF EXISTS test_table');
-            // CREATE columns with no type affinity
-            tx.executeSql('CREATE TABLE IF NOT EXISTS test_table (id integer primary key, data1, data2)');
-
-          }, function(error) {
-            expect(false).toBe(true);
-            expect(error.message).toBe('---');
-            // Close (plugin only) & finish:
-            (isWebSql) ? done() : db.close(done, done);
-
-          }, function() {
-            db.transaction(function(tx) {
-              tx.executeSql("INSERT INTO test_table (data1, data2) VALUES (?,?)", ['first'], function(tx, rs1) {
-                // ACTUAL for plugin (Android/iOS/Windows):
-                if (isWebSql) expect('RESULT NOT EXPECTED for Web SQL').toBe('--');
-                expect(rs1).toBeDefined();
-                expect(rs1.rowsAffected).toBe(1);
-
-                tx.executeSql("select * from test_table", [], function(tx, rs2) {
-                  expect(rs2.rows.length).toBe(1);
-                  expect(rs2.rows.item(0).data1).toBe('first');
-                  expect(rs2.rows.item(0).data2).toBeNull();
-                  // Close (plugin only) & finish:
-                  (isWebSql) ? done() : db.close(done, done);
-                });
-
-              }, function(error) {
-                // CORRECT (Web SQL):
-                if (!isWebSql) expect('Plugin behavior changed please update this test').toBe('--');
-                expect(true).toBe(true);
-                // Close (plugin only) & finish:
-                (isWebSql) ? done() : db.close(done, done);
-              });
-            });
-          });
-        });
-
-        it(suiteName + "executeSql with too many parameters", function(done) {
-          var db = openDatabase("too-many-parameters.db", "1.0", "Demo", DEFAULT_SIZE);
-
-          db.transaction(function(tx) {
-            tx.executeSql('DROP TABLE IF EXISTS test_table');
-            // CREATE columns with no type affinity
-            tx.executeSql('CREATE TABLE IF NOT EXISTS test_table (id integer primary key, data1, data2)');
-
-          }, function(error) {
-            expect(false).toBe(true);
-            expect(error.message).toBe('---');
-            // Close (plugin only) & finish:
-            (isWebSql) ? done() : db.close(done, done);
-
-          }, function() {
-            db.transaction(function(tx) {
-              tx.executeSql("INSERT INTO test_table (data1, data2) VALUES (?,?)", ['first', 'second', 'third'], function(tx, rs1) {
-                // ACTUAL for iOS plugin:
-                if (isWebSql) expect('RESULT NOT EXPECTED for Web SQL').toBe('--');
-                expect(rs1).toBeDefined();
-                expect(rs1.rowsAffected).toBe(1);
-
-                tx.executeSql("select * from test_table", [], function(tx, rs2) {
-                  expect(rs2.rows.length).toBe(1);
-                  expect(rs2.rows.item(0).data1).toBe('first');
-                  expect(rs2.rows.item(0).data2).toBe('second');
-                  // Close (plugin only) & finish:
-                  (isWebSql) ? done() : db.close(done, done);
-                });
-
-              }, function(error) {
-                // CORRECT (Web SQL; Android & Windows plugin):
-                if (!isWebSql && !isAndroid && !isWindows) expect('Plugin behavior changed please update this test').toBe('--');
-                expect(true).toBe(true);
-                // Close (plugin only) & finish:
-                (isWebSql) ? done() : db.close(done, done);
-              });
-            });
-          });
-        });
-
       });
 
       describe(scenarioList[i] + ': extra tx column value binding test(s)', function() {
@@ -372,7 +336,7 @@ var mytests = function() {
         test_it(suiteName + ' stores [Unicode] string with \\u0000 correctly', function () {
           if (isWindows) pending('BROKEN on Windows'); // XXX
           if (isWP8) pending('BROKEN for WP(8)'); // [BUG #202] UNICODE characters not working with WP(8)
-          if (isAndroid && !isWebSql && !isOldImpl) pending('BROKEN for Android (default sqlite-connector version)'); // XXX
+          if (isAndroid && !isWebSql && !isImpl2) pending('BROKEN for Android (default sqlite-connector version)'); // XXX
 
           stop();
 
