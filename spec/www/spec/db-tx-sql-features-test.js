@@ -4,20 +4,21 @@ var MYTIMEOUT = 20000;
 
 var DEFAULT_SIZE = 5000000; // max to avoid popup in safari/ios
 
-var isWP8 = /IEMobile/.test(navigator.userAgent); // Matches WP(7/8/8.1)
-var isWindows = /Windows /.test(navigator.userAgent); // Windows
+var isWP8X = /IEMobile/.test(navigator.userAgent); // WP8/Windows Phone 8.1
+var isWindows = /Windows /.test(navigator.userAgent); // Windows 8.1/Windows Phone 8.1/Windows 10
 var isAndroid = !isWindows && /Android/.test(navigator.userAgent);
 
-// NOTE: In the common storage-master branch there is no difference between the
-// default implementation and implementation #2. But the test will also apply
-// the androidLockWorkaround: 1 option in the case of implementation #2.
+// NOTE: In certain versions such as Cordova-sqlcipher-adapter there is
+// no difference between the default implementation and implementation #2.
+// But the test will also specify the androidLockWorkaround: 1 option
+// in case of implementation #2 (also ignored by Cordova-sqlcipher-adapter).
 var scenarioList = [
   isAndroid ? 'Plugin-implementation-default' : 'Plugin',
   'HTML5',
   'Plugin-implementation-2'
 ];
 
-var scenarioCount = (!!window.hasWebKitBrowser) ? (isAndroid ? 3 : 2) : 1;
+var scenarioCount = (!!window.hasBrowserWithWebSQL) ? (isAndroid ? 3 : 2) : 1;
 
 var mytests = function() {
 
@@ -51,9 +52,9 @@ var mytests = function() {
         // - Android (default Android-sqlite-connector implementation)
         // - iOS & Windows (with newer sqlite3 build)
         it(suiteName + 'db readTransaction with a WITH clause', function(done) {
-          if (isWP8) pending('NOT IMPLEMENTED for WP(8)');
+          if (isWP8X) pending('NOT SUPPORTED for WP8'); // NOT IMPLEMENTED in CSharp-SQLite
           if (isWebSql) pending('SKIP for Web SQL'); // NOT WORKING on all versions (Android/iOS)
-          if (isAndroid && isImpl2) pending('SKIP for android.database implementation'); // NOT WORKING on all versions
+          if (isAndroid && isImpl2) pending('SKIP for AOSP android.database implementation'); // NOT WORKING on all versions
 
           var db = openDatabase('tx-with-a-with-clause-test.db', '1.0', 'Test', DEFAULT_SIZE);
 
@@ -78,8 +79,8 @@ var mytests = function() {
 
         /* THANKS to @calebeaires: */
         it(suiteName + 'create virtual table using FTS3', function(done) {
-          if (isWP8) pending('NOT IMPLEMENTED for WP(8)'); // NOT IMPLEMENTED in CSharp-SQLite
-          if (isAndroid && isWebSql) pending('SKIP for Android Web SQL');
+          if (isWP8X) pending('NOT SUPPORTED for WP8'); // NOT IMPLEMENTED in CSharp-SQLite
+          if (isWebSql && isAndroid) pending('SKIP for Android Web SQL');
 
           var db = openDatabase('virtual-table-using-fts3.db', '1.0', 'Test', DEFAULT_SIZE);
 
@@ -91,7 +92,6 @@ var mytests = function() {
           db.transaction(function(tx) {
             expect(tx).toBeDefined();
 
-            //tx.executeSql('CREATE INDEX liv_index ON book (liv, cap);');
             tx.executeSql('DROP TABLE IF EXISTS virtual_book');
             tx.executeSql('CREATE VIRTUAL TABLE IF NOT EXISTS virtual_book USING FTS3 (liv, cap, ver, tex, tes);', [], function(tx_ignored, rs_ignored) {
               // CREATE OK:
@@ -124,7 +124,7 @@ var mytests = function() {
         // FTS4 seems to be working as well!
         // (thanks again to @calebeaires for this scenario)
         it(suiteName + 'create virtual table using FTS4', function(done) {
-          if (isWP8) pending('NOT IMPLEMENTED for WP(8)'); // NOT IMPLEMENTED in CSharp-SQLite
+          if (isWP8X) pending('NOT SUPPORTED for WP8'); // NOT IMPLEMENTED in CSharp-SQLite
           if (isWebSql) pending('SKIP for Web SQL');
 
           var db = openDatabase('virtual-table-using-fts4.db', '1.0', 'Test', DEFAULT_SIZE);
@@ -168,8 +168,9 @@ var mytests = function() {
 
         // Test for Cordova-sqlcipher-adapter version (SQLCipher 3.4.0 based on SQLite 3.11.0)
         it(suiteName + 'Basic JSON1 json test', function(done) {
-          //if (isWebSql) pending('SKIP for Web SQL (not implemented)');
-          pending('SKIP: NOT IMPLEMENTED for this version');
+          if (isWP8X) pending('NOT SUPPORTED for WP8'); // NOT IMPLEMENTED in CSharp-SQLite
+          if (isWebSql) pending('SKIP for Web SQL');
+          if (!isWebSql) pending('SKIP for plugin');
 
           var db = openDatabase('basic-json1-json-test.db', '1.0', 'Test', DEFAULT_SIZE);
 
@@ -198,8 +199,9 @@ var mytests = function() {
 
         // Test for Cordova-sqlcipher-adapter version (SQLCipher 3.4.0 based on SQLite 3.11.0)
         it(suiteName + 'JSON1 json_object test', function(done) {
-          //if (isWebSql) pending('SKIP for Web SQL (not implemented)');
-          pending('SKIP: NOT IMPLEMENTED for this version');
+          if (isWP8X) pending('NOT SUPPORTED for WP8'); // NOT IMPLEMENTED in CSharp-SQLite
+          if (isWebSql) pending('SKIP for Web SQL');
+          if (!isWebSql) pending('SKIP for plugin');
 
           var db = openDatabase('json1-json-object-test.db', '1.0', 'Test', DEFAULT_SIZE);
 
@@ -229,8 +231,9 @@ var mytests = function() {
 
         // Test for Cordova-sqlcipher-adapter version (SQLCipher 3.4.0 based on SQLite 3.11.0)
         it(suiteName + 'create virtual table using FTS5', function(done) {
-          //if (isWebSql) pending('SKIP for Web SQL (not implemented)');
-          pending('SKIP: NOT IMPLEMENTED for this version');
+          if (isWP8X) pending('NOT SUPPORTED for WP8'); // NOT IMPLEMENTED in CSharp-SQLite
+          if (isWebSql) pending('SKIP for Web SQL');
+          if (!isWebSql) pending('SKIP for plugin');
 
           var db = openDatabase('virtual-table-using-fts5.db', '1.0', 'Test', DEFAULT_SIZE);
 
@@ -272,9 +275,9 @@ var mytests = function() {
         }, MYTIMEOUT);
 
         it(suiteName + 'create virtual table using R-Tree', function(done) {
+          if (isWP8X) pending('NOT SUPPORTED for WP8'); // NOT IMPLEMENTED in CSharp-SQLite
           if (isWebSql) pending('SKIP for Web SQL');
-          if (isWP8) pending('NOT IMPLEMENTED for WP(8)'); // NOT IMPLEMENTED in CSharp-SQLite
-          if (isAndroid && isImpl2) pending('NOT IMPLEMENTED for all versions of android.database'); // NOT IMPLEMENTED for all versions of Android database (failed in Circle CI)
+          if (isAndroid && isImpl2) pending('SKIP for AOSP android.database implementation'); // NOT IMPLEMENTED for all versions of AOSP android.database (failed in Circle CI)
 
           var db = openDatabase('virtual-table-using-r-tree.db', '1.0', 'Test', DEFAULT_SIZE);
 
@@ -319,11 +322,9 @@ var mytests = function() {
         // SQLITE_ENABLE_UPDATE_DELETE_LIMIT defined
         // for this feature to work.
         xit(suiteName + 'DELETE LIMIT', function(done) {
-          if (isWP8) pending('NOT IMPLEMENTED for WP(8)');
-          if (isWebSql) pending('SKIP for Web SQL (NOT IMPLEMENTED)');
-          if (isWindows) pending('NOT IMPLEMENTED for Windows');
-          if (isAndroid && !isWebSql) pending('SKIP for Android plugin'); // FUTURE TBD test with newer versions (android.database)
-          if (!(isAndroid || isWindows || isWP8)) pending('SKIP for iOS'); // NOT WORKING on any versions of iOS (plugin or Web SQL)
+          if (isWP8X) pending('NOT SUPPORTED for WP8'); // NOT IMPLEMENTED in CSharp-SQLite
+          if (isWebSql) pending('SKIP for Web SQL');
+          if (!isWebSql) pending('SKIP for plugin');
 
           var db = openDatabase('delete-limit-test.db', '1.0', 'Test', DEFAULT_SIZE);
           expect(db).toBeDefined();

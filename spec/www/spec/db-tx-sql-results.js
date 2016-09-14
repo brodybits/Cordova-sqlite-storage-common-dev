@@ -4,20 +4,21 @@ var MYTIMEOUT = 12000;
 
 var DEFAULT_SIZE = 5000000; // max to avoid popup in safari/ios
 
-var isWP8 = /IEMobile/.test(navigator.userAgent); // Matches WP(7/8/8.1)
-var isWindows = /Windows /.test(navigator.userAgent); // Windows
+var isWP8X = /IEMobile/.test(navigator.userAgent); // WP8/Windows Phone 8.1
+var isWindows = /Windows /.test(navigator.userAgent); // Windows 8.1/Windows Phone 8.1/Windows 10
 var isAndroid = !isWindows && /Android/.test(navigator.userAgent);
 
-// NOTE: In the core-master branch there is no difference between the default
-// implementation and implementation #2. But the test will also apply
-// the androidLockWorkaround: 1 option in the case of implementation #2.
+// NOTE: In certain versions such as Cordova-sqlcipher-adapter there is
+// no difference between the default implementation and implementation #2.
+// But the test will also specify the androidLockWorkaround: 1 option
+// in case of implementation #2 (also ignored by Cordova-sqlcipher-adapter).
 var scenarioList = [
   isAndroid ? 'Plugin-implementation-default' : 'Plugin',
   'HTML5',
   'Plugin-implementation-2'
 ];
 
-var scenarioCount = (!!window.hasWebKitBrowser) ? (isAndroid ? 3 : 2) : 1;
+var scenarioCount = (!!window.hasBrowserWithWebSQL) ? (isAndroid ? 3 : 2) : 1;
 
 var mytests = function() {
 
@@ -393,7 +394,7 @@ var mytests = function() {
         }, MYTIMEOUT);
 
         it(suiteName + 'tx sql starting with extra space results test', function(done) {
-          if (isWP8) pending('BROKEN for WP8');
+          if (isWP8X) pending('BROKEN for WP8');
 
           var db = openDatabase('tx-sql-starting-with-extra-space-results-test.db', '1.0', 'Test', DEFAULT_SIZE);
 
@@ -496,7 +497,7 @@ var mytests = function() {
 
         it(suiteName + 'tx sql starting with extra semicolon results test', function(done) {
           // XXX [BUG #458] BROKEN for android.database & WP8
-          if (isWP8) pending('BROKEN for WP8');
+          if (isWP8X) pending('BROKEN for WP8');
           if (isAndroid && isImpl2) pending('BROKEN for android.database implementation');
 
           var db = openDatabase('tx-sql-starting-with-extra-semicolon-results-test.db', '1.0', 'Test', DEFAULT_SIZE);
@@ -600,7 +601,7 @@ var mytests = function() {
 
       if (!isWebSql) // NOT supported by Web SQL:
         it(suiteName + 'Multi-row INSERT with parameters - NOT supported by Web SQL', function(done) {
-          if (isWP8) pending('NOT SUPPORTED for WP8');
+          if (isWP8X) pending('NOT SUPPORTED for WP8');
 
           var db = openDatabase('Multi-row-INSERT-with-parameters-test.db', '1.0', 'Test', DEFAULT_SIZE);
 
@@ -777,7 +778,7 @@ var mytests = function() {
 
         it(suiteName + 'INSERT with TRIGGER', function(done) {
           if (isAndroid && isImpl2) pending('BUG with android.database implementation');
-          if (isWP8) pending('SKIP (NOT SUPPORTED) for WP8'); // NOT SUPPORTED for WP8
+          if (isWP8X) pending('SKIP (NOT SUPPORTED) for WP8'); // NOT SUPPORTED for WP8
 
           var db = openDatabase('INSERT-with-TRIGGER-test.db', '1.0', 'Test', DEFAULT_SIZE);
 
@@ -937,9 +938,9 @@ var mytests = function() {
         // FUTURE TODO more +/- INFINITY, NAN tests
 
         it(suiteName + "SELECT abs('9e999') (Infinity) result test", function(done) {
-          if (isWP8) pending('SKIP for WP(8)');
+          if (isWP8X) pending('SKIP for WP8');
           if (isAndroid && !isWebSql) pending('SKIP for Android plugin');
-          if (!isWP8 && !isWindows && !isAndroid && !isWebSql) pending('SKIP for iOS plugin');
+          if (!isWP8X && !isWindows && !isAndroid && !isWebSql) pending('SKIP for iOS plugin');
 
           var db = openDatabase('Infinite-results-test.db', '1.0', 'Test', DEFAULT_SIZE);
 
