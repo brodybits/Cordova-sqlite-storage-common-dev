@@ -4,20 +4,21 @@ var MYTIMEOUT = 12000;
 
 var DEFAULT_SIZE = 5000000; // max to avoid popup in safari/ios
 
-var isWP8 = /IEMobile/.test(navigator.userAgent); // Matches WP(7/8/8.1)
-var isWindows = /Windows /.test(navigator.userAgent); // Windows
+var isWP8X = /IEMobile/.test(navigator.userAgent); // WP8/Windows Phone 8.1
+var isWindows = /Windows /.test(navigator.userAgent); // Windows 8.1/Windows Phone 8.1/Windows 10
 var isAndroid = !isWindows && /Android/.test(navigator.userAgent);
 
-// NOTE: In the core-master branch there is no difference between the default
-// implementation and implementation #2. But the test will also apply
-// the androidLockWorkaround: 1 option in the case of implementation #2.
+// NOTE: In certain versions such as Cordova-sqlcipher-adapter there is
+// no difference between the default implementation and implementation #2.
+// But the test will also specify the androidLockWorkaround: 1 option
+// in case of implementation #2 (also ignored by Cordova-sqlcipher-adapter).
 var scenarioList = [
   isAndroid ? 'Plugin-implementation-default' : 'Plugin',
   'HTML5',
   'Plugin-implementation-2'
 ];
 
-var scenarioCount = (!!window.hasWebKitBrowser) ? (isAndroid ? 3 : 2) : 1;
+var scenarioCount = (!!window.hasBrowserWithWebSQL) ? (isAndroid ? 3 : 2) : 1;
 
 var mytests = function() {
 
@@ -393,7 +394,7 @@ var mytests = function() {
         }, MYTIMEOUT);
 
         it(suiteName + 'tx sql starting with extra space results test', function(done) {
-          if (isWP8) pending('BROKEN for WP8');
+          if (isWP8X) pending('BROKEN for WP8');
 
           var db = openDatabase('tx-sql-starting-with-extra-space-results-test.db', '1.0', 'Test', DEFAULT_SIZE);
 
@@ -496,7 +497,7 @@ var mytests = function() {
 
         it(suiteName + 'tx sql starting with extra semicolon results test', function(done) {
           // XXX [BUG #458] BROKEN for android.database & WP8
-          if (isWP8) pending('BROKEN for WP8');
+          if (isWP8X) pending('BROKEN for WP8');
           if (isAndroid && isImpl2) pending('BROKEN for android.database implementation');
 
           var db = openDatabase('tx-sql-starting-with-extra-semicolon-results-test.db', '1.0', 'Test', DEFAULT_SIZE);
@@ -600,7 +601,7 @@ var mytests = function() {
 
       if (!isWebSql) // NOT supported by Web SQL:
         it(suiteName + 'Multi-row INSERT with parameters - NOT supported by Web SQL', function(done) {
-          if (isWP8) pending('NOT SUPPORTED for WP8');
+          if (isWP8X) pending('NOT SUPPORTED for WP8');
 
           var db = openDatabase('Multi-row-INSERT-with-parameters-test.db', '1.0', 'Test', DEFAULT_SIZE);
 
@@ -777,7 +778,7 @@ var mytests = function() {
 
         it(suiteName + 'INSERT with TRIGGER', function(done) {
           if (isAndroid && isImpl2) pending('BUG with android.database implementation');
-          if (isWP8) pending('SKIP (NOT SUPPORTED) for WP8'); // NOT SUPPORTED for WP8
+          if (isWP8X) pending('SKIP (NOT SUPPORTED) for WP8'); // NOT SUPPORTED for WP8
 
           var db = openDatabase('INSERT-with-TRIGGER-test.db', '1.0', 'Test', DEFAULT_SIZE);
 
@@ -934,31 +935,389 @@ var mytests = function() {
           }
         }, MYTIMEOUT);
 
-        // FUTURE TODO more +/- INFINITY, NAN tests
+      describe(suiteName + 'Infinity/NaN manipulation results', function() {
 
-        it(suiteName + "SELECT abs('9e999') (Infinity) result test", function(done) {
-          if (isWP8) pending('SKIP for WP(8)');
-          if (isAndroid && !isWebSql) pending('SKIP for Android plugin');
-          if (!isWP8 && !isWindows && !isAndroid && !isWebSql) pending('SKIP for iOS plugin');
+        // General ref: http://sqlite.1065341.n5.nabble.com/NaN-in-0-0-out-td19086.html
 
-          var db = openDatabase('Infinite-results-test.db', '1.0', 'Test', DEFAULT_SIZE);
+        it(suiteName + "SELECT upper(abs(?)) with '9e999' (Infinity) parameter argument (reference test)", function(done) {
+          var db = openDatabase('SELECT-upper-abs-Infinite-parameter-results-test.db', '1.0', 'Test', DEFAULT_SIZE);
 
           db.transaction(function(tx) {
             expect(tx).toBeDefined();
 
-            tx.executeSql('SELECT abs(?) AS absResult', ['9e999'], function(tx, res) {
+            tx.executeSql('SELECT upper(abs(?)) AS myresult', ['9e999'], function(tx, res) {
               expect(res).toBeDefined();
               expect(res.rows).toBeDefined();
               expect(res.rows.length).toBe(1);
-              expect(res.rows.item(0).absResult).toBeDefined();
-              expect(res.rows.item(0).absResult).toBe(Infinity);
+              expect(res.rows.item(0).myresult).toBeDefined();
+              expect(res.rows.item(0).myresult).toBe('INF');
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
-
           });
         }, MYTIMEOUT);
+
+        it(suiteName + "SELECT lower(-abs(?)) with '9e999' (Infinity) parameter argument (reference test)", function(done) {
+          var db = openDatabase('SELECT-lower-minus-abs-Infinite-parameter-results-test.db', '1.0', 'Test', DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+            expect(tx).toBeDefined();
+
+            tx.executeSql('SELECT lower(-abs(?)) AS myresult', ['9e999'], function(tx, res) {
+              expect(res).toBeDefined();
+              expect(res.rows).toBeDefined();
+              expect(res.rows.length).toBe(1);
+              expect(res.rows.item(0).myresult).toBeDefined();
+              expect(res.rows.item(0).myresult).toBe('-inf');
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            });
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'SELECT lower(?) with Infinity parameter argument', function(done) {
+          var db = openDatabase('SELECT-lower-Infinite-parameter-results-test.db', '1.0', 'Test', DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+            expect(tx).toBeDefined();
+
+            tx.executeSql('SELECT lower(?) AS myresult', [Infinity], function(ignored, res) {
+              expect(res).toBeDefined();
+              expect(res.rows).toBeDefined();
+              expect(res.rows.length).toBe(1);
+              expect(res.rows.item(0).myresult).toBeDefined();
+              expect(res.rows.item(0).myresult).toBe('inf');
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            }, function(ignored, error) {
+              expect(false).toBe(true);
+              expect(error.message).toBe('--');
+            });
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'SELECT upper(?) with -Infinity parameter argument', function(done) {
+          var db = openDatabase('SELECT-upper-minus-Infinite-parameter-results-test.db', '1.0', 'Test', DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+            expect(tx).toBeDefined();
+
+            tx.executeSql('SELECT upper(?) AS myresult', [-Infinity], function(ignored, res) {
+              expect(res).toBeDefined();
+              expect(res.rows).toBeDefined();
+              expect(res.rows.length).toBe(1);
+              expect(res.rows.item(0).myresult).toBeDefined();
+              expect(res.rows.item(0).myresult).toBe('-INF');
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            }, function(ignored, error) {
+              expect(false).toBe(true);
+              expect(error.message).toBe('--');
+            });
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'SELECT typeof(?) with Infinity parameter argument', function(done) {
+          var db = openDatabase('SELECT-typeof-Infinite-parameter-results-test.db', '1.0', 'Test', DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+            expect(tx).toBeDefined();
+
+            tx.executeSql('SELECT typeof(?) AS myresult', [Infinity], function(ignored, res) {
+              expect(res).toBeDefined();
+              expect(res.rows).toBeDefined();
+              expect(res.rows.length).toBe(1);
+              expect(res.rows.item(0).myresult).toBeDefined();
+              expect(res.rows.item(0).myresult).toBe('real');
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            }, function(ignored, error) {
+              expect(false).toBe(true);
+              expect(error.message).toBe('--');
+            });
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'SELECT typeof(?) with -Infinity parameter argument', function(done) {
+          var db = openDatabase('SELECT-typeof-minus-Infinite-parameter-results-test.db', '1.0', 'Test', DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+            expect(tx).toBeDefined();
+
+            tx.executeSql('SELECT typeof(?) AS myresult', [-Infinity], function(ignored, res) {
+              expect(res).toBeDefined();
+              expect(res.rows).toBeDefined();
+              expect(res.rows.length).toBe(1);
+              expect(res.rows.item(0).myresult).toBeDefined();
+              expect(res.rows.item(0).myresult).toBe('real');
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            }, function(ignored, error) {
+              expect(false).toBe(true);
+              expect(error.message).toBe('--');
+            });
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'SELECT (?) with Infinity parameter argument' +
+           ((isWebSql || isWindows || isWP8X) ? '' : ' [Android/iOS PLUGIN BROKEN: missing/incorrect result]'), function(done) {
+          var db = openDatabase('SELECT-Infinite-parameter-results-test.db', '1.0', 'Test', DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+            expect(tx).toBeDefined();
+
+            tx.executeSql('SELECT upper(?) AS myresult', [Infinity], function(ignored, res) {
+              expect(res).toBeDefined();
+              expect(res.rows).toBeDefined();
+              expect(res.rows.length).toBe(1);
+              if (!(!isWebSql && isAndroid)) {
+                expect(res.rows.item(0).myresult).toBeDefined();
+                expect(res.rows.item(0).myresult).toBe(Infinity);
+              }
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            }, function(ignored, error) {
+              expect(false).toBe(true);
+              expect(error.message).toBe('--');
+            });
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'SELECT (?) with -Infinity parameter argument' +
+           ((isWebSql || isWindows || isWP8X) ? '' : ' [Android/iOS PLUGIN BROKEN: missing/incorrect result]'), function(done) {
+          var db = openDatabase('SELECT-minus-Infinite-parameter-results-test.db', '1.0', 'Test', DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+            expect(tx).toBeDefined();
+
+            tx.executeSql('SELECT upper(?) AS myresult', [-Infinity], function(ignored, res) {
+              expect(res).toBeDefined();
+              expect(res.rows).toBeDefined();
+              expect(res.rows.length).toBe(1);
+              if (isWebSql || !isAndroid) {
+                expect(res.rows.item(0).myresult).toBeDefined();
+                expect(res.rows.item(0).myresult).toBe(-Infinity);
+              }
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            }, function(ignored, error) {
+              expect(false).toBe(true);
+              expect(error.message).toBe('--');
+            });
+          });
+        }, MYTIMEOUT);
+
+        // XXX TODO Android bug??
+        // WORKING for:
+        // - WebKit Web SQL [??]
+        // - Windows
+        // BROKEN:
+        // - Android plugin: ??? ____
+        // - iOS plugin CRASHING ref: litehelpers/Cordova-sqlite-storage#405
+        // ref: Apache Cordova CB-11737
+        it(suiteName + "SELECT abs(?) with '9e999' (Infinity) parameter argument" +
+           ((isWebSql || isWindows || isWP8X) ? '' : ' [Android PLUGIN BROKEN: missing result]'), function(done) {
+          //if (isWP8X) pending('SKIP for WP8');
+          //if (!isWebSql && isAndroid) pending('SKIP for Android plugin');
+          if (!isWebSql && !isAndroid && !isWindows && !isWP8X) pending('SKIP for iOS plugin due to CRASH');
+
+          var db = openDatabase('SELECT-abs-Infinite-parameter-results-test.db', '1.0', 'Test', DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+            expect(tx).toBeDefined();
+
+            tx.executeSql('SELECT abs(?) AS myresult', ['9e999'], function(tx, res) {
+              expect(res).toBeDefined();
+              expect(res.rows).toBeDefined();
+              expect(res.rows.length).toBe(1);
+              if (isWebSql || !isAndroid) {
+                expect(res.rows.item(0).myresult).toBeDefined();
+                expect(res.rows.item(0).myresult).toBe(Infinity);
+              }
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            });
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + "SELECT -abs(?) with '9e999' (Infinity) parameter argument" +
+           ((isWebSql || isWindows || isWP8X) ? '' : ' [Android PLUGIN BROKEN: missing result]'), function(done) {
+          //if (isWP8X) pending('SKIP for WP8');
+          //if (!isWebSql && isAndroid) pending('SKIP for Android plugin');
+          if (!isWebSql && !isAndroid && !isWindows && !isWP8X) pending('SKIP for iOS plugin due to CRASH');
+
+          var db = openDatabase('SELECT-abs-Infinite-parameter-results-test.db', '1.0', 'Test', DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+            expect(tx).toBeDefined();
+
+            tx.executeSql('SELECT -abs(?) AS myresult', ['9e999'], function(tx, res) {
+              expect(res).toBeDefined();
+              expect(res.rows).toBeDefined();
+              expect(res.rows.length).toBe(1);
+              if (isWebSql || !isAndroid) {
+                expect(res.rows.item(0).myresult).toBeDefined();
+                expect(res.rows.item(0).myresult).toBe(-Infinity);
+              }
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            });
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + "Infinity/NaN reference test: SELECT abs(?)-abs(?) with '9e999' (Infinity) parameter argument values", function(done) {
+          var db = openDatabase('SELECT-abs-minus-abs-with-Infinite-parameter-values-test.db', '1.0', 'Test', DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+            expect(tx).toBeDefined();
+
+            tx.executeSql('SELECT abs(?)-abs(?) AS myresult', ['9e999', '9e999'], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).myresult).toBeDefined();
+              expect(rs.rows.item(0).myresult).toBeNull();
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            });
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'Infinity/NaN test: SELECT (?-?) with Infinity parameter argument values', function(done) {
+          var db = openDatabase('SELECT-minus-with-Infinite-parameter-values-test.db', '1.0', 'Test', DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+            expect(tx).toBeDefined();
+
+            tx.executeSql('SELECT abs(?-?) AS myresult', [Infinity, Infinity], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).myresult).toBeDefined();
+              expect(rs.rows.item(0).myresult).toBeNull();
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            });
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'Infinity/NaN test: SELECT (?+?) with [Infinity, -Infinity] parameter argument values', function(done) {
+          var db = openDatabase('SELECT-sum-with-Infinite-and-minus-Infinity-parameter-values-test.db', '1.0', 'Test', DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+            expect(tx).toBeDefined();
+
+            tx.executeSql('SELECT abs(?+?) AS myresult', [Infinity, -Infinity], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).myresult).toBeDefined();
+              expect(rs.rows.item(0).myresult).toBeNull();
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            });
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + "NaN reference test: SELECT (1/0)", function(done) {
+          var db = openDatabase('SELECT-1-div-0-test.db', '1.0', 'Test', DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+            expect(tx).toBeDefined();
+
+            tx.executeSql('SELECT (1/0) AS myresult', [], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).myresult).toBeDefined();
+              expect(rs.rows.item(0).myresult).toBeNull();
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            });
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'SELECT upper(?) with NaN parameter argument', function(done) {
+          var db = openDatabase('SELECT-upper-with-NaN-parameter-results-test.db', '1.0', 'Test', DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+            expect(tx).toBeDefined();
+
+            tx.executeSql('SELECT upper(?) AS myresult', [NaN], function(ignored, res) {
+              expect(res).toBeDefined();
+              expect(res.rows).toBeDefined();
+              expect(res.rows.length).toBe(1);
+              expect(res.rows.item(0).myresult).toBeDefined();
+              expect(res.rows.item(0).myresult).toBeNull();
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            }, function(ignored, error) {
+              expect(false).toBe(true);
+              expect(error.message).toBe('--');
+            });
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'SELECT typeof(?) with NaN parameter argument', function(done) {
+          var db = openDatabase('SELECT-NaN-parameter-results-test.db', '1.0', 'Test', DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+            expect(tx).toBeDefined();
+
+            tx.executeSql('SELECT typeof(?) AS myresult', [NaN], function(ignored, res) {
+              expect(res).toBeDefined();
+              expect(res.rows).toBeDefined();
+              expect(res.rows.length).toBe(1);
+              expect(res.rows.item(0).myresult).toBeDefined();
+              expect(res.rows.item(0).myresult).toBe('null');
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            }, function(ignored, error) {
+              expect(false).toBe(true);
+              expect(error.message).toBe('--');
+            });
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'SELECT (?) with NaN parameter argument', function(done) {
+          var db = openDatabase('SELECT-NaN-parameter-results-test.db', '1.0', 'Test', DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+            expect(tx).toBeDefined();
+
+            tx.executeSql('SELECT (?) AS myresult', [NaN], function(ignored, res) {
+              expect(res).toBeDefined();
+              expect(res.rows).toBeDefined();
+              expect(res.rows.length).toBe(1);
+              expect(res.rows.item(0).myresult).toBeDefined();
+              expect(res.rows.item(0).myresult).toBeNull();
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            }, function(ignored, error) {
+              expect(false).toBe(true);
+              expect(error.message).toBe('--');
+            });
+          });
+        }, MYTIMEOUT);
+
+      });
 
     });
 
