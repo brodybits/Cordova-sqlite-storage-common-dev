@@ -456,6 +456,9 @@
         } else if (strcmp(numberType, @encode(double)) == 0) {
             sqlite3_bind_double(statement, argIndex, [numberArg doubleValue]);
         } else {
+            // NOTE: This clause does not seem to be hit by the existing test suite.
+            // In general it should be safe to simply use the double value if
+            // an INTEGER value was not detected.
             sqlite3_bind_text(statement, argIndex, [[arg description] UTF8String], -1, SQLITE_TRANSIENT);
         }
     } else { // NSString
