@@ -383,11 +383,17 @@ var mytests = function() {
           try {
             db.transaction(function(tx) {
               throw new Error("boom");
-            }, function(err) {
-              expect(err).toBeDefined();
-              expect(err.hasOwnProperty('message')).toBe(true);
+            }, function(error) {
+              expect(error).toBeDefined();
+              if (isWebSql)
+                expect(error.code).not.toBeDefined();
+              else
+                expect(error.code).toBeDefined();
+              expect(error.message.toBeDefined();
 
-              if (!isWebSql) expect(err.message).toEqual('boom');
+              if (!isWebSql)
+                expect(error.code).toBe(0);
+              expect(error.message).toMatch('boom');
 
               start();
             }, function() {
@@ -396,7 +402,7 @@ var mytests = function() {
               start();
             });
             ok(true, "db.transaction() did not throw an error");
-          } catch(err) {
+          } catch(ex) {
             // exception not expected here
             expect(false).toBe(true);
             start();
@@ -499,11 +505,11 @@ var mytests = function() {
             });
           });
         });
-        
+
         test_it(suiteName + "executeSql fails outside transaction", function() {
           withTestTable(function(db) {
             expect(4);
-            ok(!!db, "db ok");            
+            ok(!!db, "db ok");
             var txg;
             stop(2);
             db.transaction(function(tx) {
@@ -527,7 +533,7 @@ var mytests = function() {
                 ok(!!err.message, "error had valid message");
               }
               start(1);
-            });            
+            });
           });
         });
 
