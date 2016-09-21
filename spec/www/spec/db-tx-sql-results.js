@@ -94,6 +94,205 @@ var mytests = function() {
           });
         });
 
+        it(suiteName + 'SELECT TYPEOF(?) with [null] parameter argument [returns text in case of androidDatabaseImplementation: 2]', function(done) {
+          var db = openDatabase('SELECT-typeof-with-null-argument');
+          expect(db).toBeDefined();
+
+          db.transaction(function(tx) {
+            tx.executeSql('SELECT TYPEOF(?) AS myresult', [null], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              if (!isWebSql && isAndroid && isImpl2)
+                expect(rs.rows.item(0).myresult).toBe('text');
+              else
+                expect(rs.rows.item(0).myresult).toBe('null');
+              done();
+            });
+          }, function(error) {
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            done();
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'SELECT TYPEOF(?) with [undefined] parameter argument', function(done) {
+          var db = openDatabase('SELECT-typeof-with-undefined-argument');
+          expect(db).toBeDefined();
+
+          db.transaction(function(tx) {
+            tx.executeSql('SELECT TYPEOF(?) AS myresult', [undefined], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              if ((isWebSql && isAndroid) || (!isWebSql && isAndroid && isImpl2))
+                expect(rs.rows.item(0).myresult).toBe('text');
+              else
+                expect(rs.rows.item(0).myresult).toBe('null');
+              done();
+            });
+          }, function(error) {
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            done();
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'SELECT UPPER(?) with [undefined] parameter argument', function(done) {
+          var db = openDatabase('SELECT-upper-with-undefined-argument');
+          expect(db).toBeDefined();
+
+          db.transaction(function(tx) {
+            tx.executeSql('SELECT UPPER(?) AS myresult', [undefined], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              if ((isWebSql && isAndroid) || (!isWebSql && isAndroid && isImpl2))
+                expect(rs.rows.item(0).myresult).toBe('text');
+              else
+                expect(rs.rows.item(0).myresult).toBe('null');
+              done();
+            });
+          }, function(error) {
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            done();
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'SELECT TYPEOF(?) with [Infinity] parameter argument', function(done) {
+          var db = openDatabase('SELECT-typeof-with-infinity-argument');
+          expect(db).toBeDefined();
+
+          db.transaction(function(tx) {
+            tx.executeSql('SELECT TYPEOF(?) AS myresult', [Infinity], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).myresult).toBe('--');
+              done();
+            });
+          }, function(error) {
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            done();
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'SELECT UPPER(?) with [-Infinity] parameter argument', function(done) {
+          var db = openDatabase('SELECT-upper-with-minus-infinity-argument');
+          expect(db).toBeDefined();
+
+          db.transaction(function(tx) {
+            tx.executeSql('SELECT UPPER(?) AS myresult', [-Infinity], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).myresult).toBe('--');
+              done();
+            });
+          }, function(error) {
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            done();
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'SELECT TYPEOF(?) with [NaN] parameter argument', function(done) {
+          var db = openDatabase('SELECT-typeof-with-infinity-argument');
+          expect(db).toBeDefined();
+
+          db.transaction(function(tx) {
+            tx.executeSql('SELECT TYPEOF(?) AS myresult', [NaN], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).myresult).toBe('--');
+              done();
+            });
+          }, function(error) {
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            done();
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'SELECT UPPER(?) AS upper1, UPPER(?) AS upper2 with "naive" Array subclass (constructor NOT explicitly set) as value arguments array', function(done) {
+          var db = openDatabase('SELECT-multi-upper-on-array-subclass.db');
+          expect(db).toBeDefined();
+
+          // Variation on the "naive approach" described in
+          // http://perfectionkills.com/how-ecmascript-5-still-does-not-allow-to-subclass-an-array/
+          function F() {}
+          F.prototype = Array.prototype;
+          function MyArraySubclass() {}
+          MyArraySubclass.prototype = new F();
+          myObject = new MyArraySubclass();
+          myObject.push('s1', 's2');
+
+          expect(myObject.length).toBe(2);
+          expect(myObject[0]).toBe('s1');
+          expect(myObject[1]).toBe('s2');
+
+          expect(myObject.constructor).toBe(Array);
+
+          db.transaction(function(tx) {
+            tx.executeSql('SELECT UPPER(?) AS upper1, UPPER(?) AS upper2', myObject, function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).upper1).toBe('S1');
+              expect(rs.rows.item(0).upper2).toBe('S2');
+              expect(rs.rows.item(0).upper1).toBe('--');
+              expect(rs.rows.item(0).upper2).toBe('--');
+              done();
+            });
+          }, function(error) {
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            done();
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'SELECT UPPER(?) AS upper1, UPPER(?) AS upper2 with "naive" Array subclass (constructor explicitly set to subclasss) as value arguments array', function(done) {
+          var db = openDatabase('SELECT-multi-upper-on-array-subclass-explicit-constructor.db');
+          expect(db).toBeDefined();
+
+          // Variation on the "naive approach" described in
+          // http://perfectionkills.com/how-ecmascript-5-still-does-not-allow-to-subclass-an-array/
+          function F() {}
+          F.prototype = Array.prototype;
+          function MyArraySubclass() {}
+          MyArraySubclass.prototype = new F();
+          myObject = new MyArraySubclass();
+          myObject.push('s1', 's2');
+
+          expect(myObject.length).toBe(2);
+          expect(myObject[0]).toBe('s1');
+          expect(myObject[1]).toBe('s2');
+
+          expect(myObject.constructor).toBe(Array);
+          myObject.constructor = MyArraySubclass;
+          expect(myObject.constructor).toBe(MyArraySubclass);
+
+          db.transaction(function(tx) {
+            tx.executeSql('SELECT UPPER(?) AS upper1, UPPER(?) AS upper2', myObject, function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).upper1).toBe('S1');
+              expect(rs.rows.item(0).upper2).toBe('S2');
+              expect(rs.rows.item(0).upper1).toBe('--');
+              expect(rs.rows.item(0).upper2).toBe('--');
+              done();
+            });
+          }, function(error) {
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            done();
+          });
+        }, MYTIMEOUT);
+
         it(suiteName + 'Simple INSERT results test: check insertId & rowsAffected in result', function(done) {
 
           var db = openDatabase('INSERT-results-test.db', '1.0', 'Test', DEFAULT_SIZE);
@@ -243,7 +442,21 @@ var mytests = function() {
               expect(res).toBeDefined();
 
               expect(res.insertId).toBeDefined();
+              expect(res.insertId).toBe(1); // first
               expect(res.rowsAffected).toBe(1);
+
+              // Plugin DEVIATION:
+              // res.insertId & res.rowsAffected should be immutable
+              // ref: https://www.w3.org/TR/webdatabase/#database-query-results
+              res.insertId = 2;
+              res.rowsAffected = 3;
+              if (isWebSql) {
+                expect(res.insertId).toBe(1); // first
+                expect(res.rowsAffected).toBe(1);
+              } else {
+                expect(res.insertId).toBe(2);
+                expect(res.rowsAffected).toBe(3);
+              }
 
               db.transaction(function(tx) {
                 // second tx object:
@@ -261,6 +474,16 @@ var mytests = function() {
 
                   expect(res.rows.length).toBe(1);
                   expect(res.rows.item(0).data_num).toBe(100);
+
+                  // Plugin DEVIATION:
+                  // res.rows.length should be immutable
+                  // ref: https://www.w3.org/TR/webdatabase/#database-query-results
+                  res.rows.length = 2;
+                  if (isWebSql) {
+                    expect(res.rows.length).toBe(1);
+                  } else {
+                    expect(res.rows.length).toBe(2);
+                  }
                 });
 
                 tx.executeSql('SELECT data FROM test_table;', [], function(tx, res) {
@@ -326,7 +549,7 @@ var mytests = function() {
                   expect(temp1.data).toBe('test');
                   expect(temp2.data).toBe('test');
 
-                  // Object from rows.item is immutable in Web SQL but NOT in this plugin:
+                  // Object from rows.item is immutable in Android/iOS WebKit Web SQL implementation but NOT in this plugin:
                   temp1.data = 'another';
 
                   if (isWebSql) {
@@ -495,9 +718,9 @@ var mytests = function() {
         }, MYTIMEOUT);
 
         it(suiteName + 'tx sql starting with extra semicolon results test', function(done) {
-          // XXX [BUG #458] BROKEN for android.database & WP8
+          // [BUG #458] BROKEN for android.database & WP8
           if (isWP8) pending('BROKEN for WP8');
-          if (isAndroid && isImpl2) pending('BROKEN for android.database implementation');
+          if (isAndroid && isImpl2) pending('BROKEN for AOSP android.database (androidDatabaseImplementation:2 setting)');
 
           var db = openDatabase('tx-sql-starting-with-extra-semicolon-results-test.db', '1.0', 'Test', DEFAULT_SIZE);
 
@@ -598,9 +821,13 @@ var mytests = function() {
 
         }, MYTIMEOUT);
 
-      if (!isWebSql) // NOT supported by Web SQL:
-        it(suiteName + 'Multi-row INSERT with parameters - NOT supported by Web SQL', function(done) {
-          if (isWP8) pending('NOT SUPPORTED for WP8');
+      describe(scenarioList[i] + ': NON-standard Multi-row INSERT with parameters [post-sqlite 3.6 feature]', function() {
+
+        it(suiteName + 'Multi-row INSERT with parameters - DEVIATION (post-sqlite 3.6 feature)' +
+           ((!isWebSql && isAndroid && isImpl2) ? ' [SQLResultSet.rowsAffected BROKEN for AOSP android.database (androidDatabaseImplementation:2)]' : ''),
+           function(done) {
+          if (isWP8) pending('SKIP: NOT SUPPORTED for WP8');
+          if (isWebSql && isAndroid) pending('SKIP for Android Web SQL'); // FUTURE TBD (??)
 
           var db = openDatabase('Multi-row-INSERT-with-parameters-test.db', '1.0', 'Test', DEFAULT_SIZE);
 
@@ -608,9 +835,17 @@ var mytests = function() {
             tx.executeSql('DROP TABLE IF EXISTS TestTable;');
             tx.executeSql('CREATE TABLE TestTable (x,y);');
 
-            tx.executeSql('INSERT INTO TestTable VALUES (?,?),(?,?)', ['a',1,'b',2], function(ignored1, ignored2) {
+            tx.executeSql('INSERT INTO TestTable VALUES (?,?),(?,?)', ['a',1,'b',2], function(ignored1, rs1) {
+              expect(rs1).toBeDefined();
+              expect(rs1.insertId).toBeDefined();
+              expect(rs1.insertId).toBe(2);
+              if (isWebSql || !(isAndroid && isImpl2)) // [SQLResultSet.rowsAffected BROKEN for AOSP android.database]
+                expect(rs1.rowsAffected).toBe(2);
+              else
+                expect(rs1.rowsAffected).toBe(1); // [ACTUAL (BROKEN) for AOSP android.database]
+
               tx.executeSql('SELECT * FROM TestTable', [], function(ignored, resultSet) {
-                // EXPECTED: CORRECT RESULT:
+                // EXPECTED (CORRECT RESULT):
                 expect(resultSet.rows.length).toBe(2);
                 expect(resultSet.rows.item(0).x).toBe('a');
                 expect(resultSet.rows.item(0).y).toBe(1);
@@ -621,43 +856,47 @@ var mytests = function() {
                 (isWebSql) ? done() : db.close(done, done);
               });
             });
-          }, function(e) {
-            // ERROR RESULT (NOT EXPECTED):
+          }, function(error) {
+            // NOT EXPECTED (ERROR RESULT):
             expect(false).toBe(true);
-            expect(e).toBeDefined();
 
             // Close (plugin only) & finish:
             (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
+      });
 
-      if (!isWebSql) // NOT covered by Web SQL standard:
-        it(suiteName + 'INSERT statement list (NOT covered by Web SQL standard) - Plugin BROKEN', function(done) {
+      describe(suiteName + 'NON-STANDARD SQL statement list test(s)', function() {
+
+        it(suiteName + 'INSERT statement list (NOT covered by Web SQL standard) - ' +
+           (isWebSql ? 'Web SQL ERROR' : 'DEVIATION - PLUGIN BROKEN with possible data loss'), function(done) {
           var db = openDatabase('INSERT-statement-list-test.db', '1.0', 'Test', DEFAULT_SIZE);
 
           db.transaction(function(tx) {
             tx.executeSql('DROP TABLE IF EXISTS TestList;');
             tx.executeSql('CREATE TABLE TestList (data);');
 
-            // NOT supported by Web SQL, plugin BROKEN:
+            // REJECTED by [WebKit] Web SQL; PLUGIN BROKEN with possible data loss
+            // FUTURE TODO: REJECT BY PLUGIN
             tx.executeSql('INSERT INTO TestList VALUES (1); INSERT INTO TestList VALUES(2);');
-          }, function(e) {
-            // ERROR RESULT (expected for Web SQL):
+          }, function(error) {
+            // ERROR RESULT (expected for Web SQL)
             if (!isWebSql)
               expect('Plugin behavior changed').toBe('--');
-            expect(e).toBeDefined();
+            expect(error).toBeDefined();
 
             // Close (plugin only) & finish:
             (isWebSql) ? done() : db.close(done, done);
           }, function() {
+            // TBD ACTUAL RESULT [PLUGIN BROKEN with possible data loss]:
             if (isWebSql)
               expect('Unexpected result for Web SQL').toBe('--');
 
             db.transaction(function(tx2) {
               tx2.executeSql('SELECT * FROM TestList', [], function(ignored, resultSet) {
-                // CORRECT RESULT for plugin:
+                // CORRECT RESULT:
                 //expect(resultSet.rows.length).toBe(2);
-                // ACTUAL RESULT for plugin:
+                // ACTUAL RESULT for PLUGIN [BROKEN with possible parameter data loss]:
                 expect(resultSet.rows.length).toBe(1);
 
                 // FIRST ROW CORRECT:
@@ -672,33 +911,54 @@ var mytests = function() {
           });
         }, MYTIMEOUT);
 
-      if (!isWebSql) // NOT covered by Web SQL standard:
-        it(suiteName + 'First result from SELECT statement list - NOT covered by Web SQL standard', function(done) {
-          var db = openDatabase('First-result-from-SELECT-statement-list-test.db', '1.0', 'Test', DEFAULT_SIZE);
+        it(suiteName + 'executeSql with SELECT statement list - NOT ALLOWED [PLUGIN BROKEN]', function(done) {
+          // TO FIX ref: https://www.sqlite.org/c3ref/prepare.html
+          // When calling sqlite3_prepare_v2 check the OUT pzTail pointer
+          // to ensure there is no other statement afterwards.
+          // May take some more work for Android & Windows versions.
+
+          var db = openDatabase('tx-sql-with-select-statement-list.db');
 
           db.transaction(function(tx) {
-            // NOT supported by Web SQL:
-            tx.executeSql('SELECT UPPER (?) AS upper1; SELECT 1', ['Test string'], function(ignored, resultSet) {
+            tx.executeSql('SELECT 1; SELECT 2', [], function(ignored, rs) {
+              // INCORRECT (PLUGIN BROKEN)
               if (isWebSql)
-                expect('Unexpected result for Web SQL').toBe('--');
+                expect('WebKit Web SQL implementation changed (DEVIATION)').toBe('--');
+              else
+                expect(rs).toBeDefined();
 
-              expect(resultSet.rows.length).toBe(1); // ACTUAL RESULT for plugin
-              expect(resultSet.rows.item(0).upper1).toBe('TEST STRING');
-
-              // Close (plugin only) & finish:
-              (isWebSql) ? done() : db.close(done, done);
-            }, function(ignored, e) {
-              // ERROR RESULT (expected for Web SQL):
+              // EXTRA for INVESTIGATION: statement list with syntax error after the first statement
+              tx.executeSql('SELECT 1; SLCT 2', [], function(ignored1, rs2) {
+                expect(rs2).toBeDefined();
+                isWebSql ? done() : db.close(done, done);
+              }, function(ignored, error) {
+                expect('Plugin behavior changed, please update this test').toBe('--');
+                expect(error).toBeDefined();
+                // TBD ...
+                isWebSql ? done() : db.close(done, done);
+              });
+            }, function(ignored, error) {
               if (!isWebSql)
-                expect('Plugin behavior changed').toBe('--');
+                expect('PLUGIN FIXED, please update this test').toBe('--');
 
-              expect(e).toBeDefined();
+              expect(error).toBeDefined();
+              expect(error.code).toBeDefined();
+              expect(error.message).toBeDefined();
 
-              // Close (plugin only) & finish:
-              (isWebSql) ? done() : db.close(done, done);
-            });
+              expect(error.code).toBe(5); // SYNTAX_ERR
+
+              // WebKit Web SQL error message (apparenly with SQLite error code)
+              if (isWebSql)
+                expect(error.message).toMatch(/could not prepare statement.*1 not an error/);
+
+              // Close (plugin only), return false, and finish:
+              return isWebSql ? (done() || false) :
+                (db.close(done, done) || false);
+            })
           });
         }, MYTIMEOUT);
+
+      });
 
         it(suiteName + 'BLOB inserted as a literal', function(done) {
           var db = openDatabase('Literal-BLOB-INSERT-test.db', '1.0', 'Test', DEFAULT_SIZE);
@@ -729,8 +989,8 @@ var mytests = function() {
           });
         }, MYTIMEOUT);
 
-        it(suiteName + 'INSERT with SELECT', function(done) {
-          if (isAndroid && isImpl2) pending('BUG with android.database implementation');
+        it(suiteName + 'INSERT multiple rows from with SELECT [SQLResultSet.rowsAffected BROKEN for AOSP android.database (androidDatabaseImplementation:2)]', function(done) {
+          //if (isAndroid && isImpl2) pending('BUG with android.database implementation');
 
           var db = openDatabase('INSERT-with-SELECT-test.db', '1.0', 'Test', DEFAULT_SIZE);
 
@@ -750,8 +1010,11 @@ var mytests = function() {
               expect(rs1).toBeDefined();
               expect(rs1.insertId).toBeDefined();
               expect(rs1.rowsAffected).toBeDefined();
-              if (!(isAndroid && isImpl2))
-                expect(rs1.rowsAffected).toBe(2);
+              expect(rs1.insertId).toBe(2);
+              if (!(isAndroid && isImpl2)) // [SQLResultSet.rowsAffected BROKEN for AOSP android.database]
+                expect(rs1.rowsAffected).toBe(2); // [BROKEN for AOSP android.database]
+              else
+                expect(rs1.rowsAffected).toBe(1); // [ACTUAL (BROKEN) for AOSP android.database]
 
               tx.executeSql('SELECT * FROM tt2', [], function(ignored, rs2) {
                 // EXPECTED: CORRECT RESULT:

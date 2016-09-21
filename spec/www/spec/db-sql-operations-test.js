@@ -93,6 +93,144 @@ var mytests = function() {
           return window.sqlitePlugin.openDatabase(dbopts, okcb, errorcb);
         }
 
+        it(suiteName + 'db.executeSql string result test with null for parameter argument array', function(done) {
+          var db = openDatabase("DB-sql-String-result-test-with-null-parameter-arg-array.db", "1.0", "Demo", DEFAULT_SIZE);
+          expect(db).toBeDefined();
+
+          db.executeSql("SELECT UPPER('first') AS uppertext", null, function(rs) {
+            expect(rs).toBeDefined();
+            expect(rs.rows).toBeDefined();
+            expect(rs.rows.length).toBe(1);
+            expect(rs.rows.item(0).uppertext).toBe('FIRST');
+            db.close(done, done);
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            db.close(done, done);
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'db.executeSql check SELECT TYPEOF(?) with [101] for parameter argument array', function(done) {
+          var db = openDatabase("DB-sql-check-typeof-101.db", "1.0", "Demo", DEFAULT_SIZE);
+          expect(db).toBeDefined();
+
+          db.executeSql('SELECT TYPEOF(?) AS myresult', [101], function(rs) {
+            expect(rs).toBeDefined();
+            expect(rs.rows).toBeDefined();
+            expect(rs.rows.length).toBe(1);
+            expect(rs.rows.item(0).myresult).toBe('FIRST');
+            db.close(done, done);
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            db.close(done, done);
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'db.executeSql check SELECT TYPEOF(?) with [null] for parameter argument array', function(done) {
+          var db = openDatabase("DB-sql-check-typeof-null.db", "1.0", "Demo", DEFAULT_SIZE);
+          expect(db).toBeDefined();
+
+          db.executeSql('SELECT TYPEOF(?) AS myresult', [null], function(rs) {
+            expect(rs).toBeDefined();
+            expect(rs.rows).toBeDefined();
+            expect(rs.rows.length).toBe(1);
+            expect(rs.rows.item(0).myresult).toBe('null');
+            db.close(done, done);
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            db.close(done, done);
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'db.executeSql check SELECT TYPEOF(?) with [undefined] for parameter argument array', function(done) {
+          var db = openDatabase("DB-sql-check-typeof-undefined.db", "1.0", "Demo", DEFAULT_SIZE);
+          expect(db).toBeDefined();
+
+          db.executeSql('SELECT TYPEOF(?) AS myresult', [undefined], function(rs) {
+            expect(rs).toBeDefined();
+            expect(rs.rows).toBeDefined();
+            expect(rs.rows.length).toBe(1);
+            expect(rs.rows.item(0).myresult).toBe('null');
+            db.close(done, done);
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            db.close(done, done);
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'db.executeSql string result test with dynamic object for SQL [INCONSISTENT BEHAVIOR]', function(done) {
+          // MyDynamicObject "class":
+          function MyDynamicObject() { this.name = 'Alice'; };
+          MyDynamicObject.prototype.toString = function() {return "SELECT UPPER('" + this.name + "') as uppertext";}
+
+          var myObject = new MyDynamicObject();
+          // Check myObject:
+          expect(myObject.toString()).toBe("SELECT UPPER('Alice') as uppertext");
+
+          // NOTE: this test checks that for db.executeSql(), the result callback is
+          // called exactly once, with the proper result:
+          var db = openDatabase("DB-sql-string-result-test-with-dynamic-object-for-sql.db", "1.0", "Demo", DEFAULT_SIZE);
+          expect(db).toBeDefined();
+
+          myObject.name = 'Betty';
+          db.executeSql(myObject, null, function(rs) {
+            expect(rs).toBeDefined();
+            expect(rs.rows).toBeDefined();
+            expect(rs.rows.length).toBe(1);
+            // CORRECT [CONSISTENT with normal Web SQL API]:
+            //expect(rs.rows.item(0).uppertext).toBe('BETTY');
+            // ACTUAL:
+            expect(rs.rows.item(0).uppertext).toBe('CAROL');
+            db.close(done, done);
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            db.close(done, done);
+          });
+          myObject.name = 'Carol';
+        }, MYTIMEOUT);
+
+        it(suiteName + 'db.executeSql string result test with dynamic object for parameter arg [INCONSISTENT BEHAVIOR]', function(done) {
+          // MyDynamicParameterObject "class":
+          function MyDynamicParameterObject() {this.name='Alice';};
+          MyDynamicParameterObject.prototype.toString = function() {return this.name;};
+
+          var myObject = new MyDynamicParameterObject();
+          // Check myObject:
+          expect(myObject.toString()).toBe('Alice');
+
+          // NOTE: this test checks that for db.executeSql(), the result callback is
+          // called exactly once, with the proper result:
+          var db = openDatabase("DB-sql-string-result-test-with-dynamic-object-for-parameter-arg.db", "1.0", "Demo", DEFAULT_SIZE);
+          expect(db).toBeDefined();
+
+          myObject.name = 'Betty';
+          db.executeSql("SELECT UPPER(?) as uppertext", [myObject], function(rs) {
+            expect(rs).toBeDefined();
+            expect(rs.rows).toBeDefined();
+            expect(rs.rows.length).toBe(1);
+            // CORRECT [CONSISTENT with normal Web SQL API]:
+            //expect(rs.rows.item(0).uppertext).toBe('BETTY');
+            // ACTUAL:
+            expect(rs.rows.item(0).uppertext).toBe('CAROL');
+            db.close(done, done);
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            db.close(done, done);
+          });
+          myObject.name = 'Carol';
+        }, MYTIMEOUT);
+
         test_it(suiteName + "Multiple db.executeSql string result test", function() {
           // NOTE: this test checks that for db.executeSql(), the result callback is
           // called exactly once, with the proper result:

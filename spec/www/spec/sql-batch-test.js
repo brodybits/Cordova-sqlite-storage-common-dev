@@ -52,17 +52,121 @@ var mytests = function() {
 
           db.sqlBatch([
             'DROP TABLE IF EXISTS MyTable',
-            'CREATE TABLE MyTable (SampleColumn)',
+            'CREATE TABLE MyTable (data)',
             [ 'INSERT INTO MyTable VALUES (?)', ['test-value'] ],
           ], function() {
-            db.executeSql('SELECT * FROM MyTable', [], function (res) {
-              expect(res.rows.item(0).SampleColumn).toBe('test-value');
+            db.executeSql('SELECT * FROM MyTable', [], function (rs) {
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).data).toBe('test-value');
               done();
             });
           }, function(error) {
             expect(true).toBe(false);
             done();
           });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'Single-column batch sql test values', function(done) {
+          var db = openDatabase('Single-column-batch-sql-test-values.db', '1.0', 'Test', DEFAULT_SIZE);
+
+          expect(db).toBeDefined();
+
+          db.sqlBatch([
+            'DROP TABLE IF EXISTS MyTable',
+            'CREATE TABLE MyTable (data)',
+            [ 'INSERT INTO MyTable VALUES (?)', [0] ],
+            [ 'INSERT INTO MyTable VALUES (?)', [101] ],
+            [ 'INSERT INTO MyTable VALUES (?)', [1.01] ],
+            [ 'INSERT INTO MyTable VALUES (?)', [true] ],
+            [ 'INSERT INTO MyTable VALUES (?)', [false] ],
+            [ 'INSERT INTO MyTable VALUES (?)', [null] ],
+            [ 'INSERT INTO MyTable VALUES (?)', [undefined] ],
+            [ 'INSERT INTO MyTable VALUES (?)', [Infinity] ],
+            [ 'INSERT INTO MyTable VALUES (?)', [-Infinity] ],
+            [ 'INSERT INTO MyTable VALUES (?)', [NaN] ],
+          ], function() {
+            db.executeSql('SELECT * FROM MyTable', [], function (rs) {
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(10);
+              expect(rs.rows.item(0).data).toBe(0);
+              expect(rs.rows.item(1).data).toBe(101);
+              expect(rs.rows.item(2).data).toBe(1.01);
+              expect(rs.rows.item(3).data).toBe('true');
+              expect(rs.rows.item(4).data).toBe('false');
+              expect(rs.rows.item(5).data).toBe(null);
+              expect(rs.rows.item(6).data).toBe(null);
+              expect(rs.rows.item(7).data).toBe(null);
+              expect(rs.rows.item(8).data).toBe(null);
+              expect(rs.rows.item(9).data).toBe(null);
+              done();
+            });
+          }, function(error) {
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            done();
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'batch sql with dynamic object for SQL [INCONSISTENT BEHAVIOR]', function(done) {
+          // MyDynamicObject "class":
+          function MyDynamicObject() { this.name = 'Alice'; };
+          MyDynamicObject.prototype.toString = function() {return "INSERT INTO MyTable VALUES ('" + this.name + "')";}
+
+          var myObject = new MyDynamicObject();
+          // Check myObject:
+          expect(myObject.toString()).toBe("INSERT INTO MyTable VALUES ('Alice')");
+
+          var db = openDatabase('batch-sql-with-dynamic-object-for-sql.db', '1.0', 'Test', DEFAULT_SIZE);
+
+          expect(db).toBeDefined();
+
+          myObject.name = 'Betty';
+          db.sqlBatch([
+            'DROP TABLE IF EXISTS MyTable',
+            'CREATE TABLE MyTable (data)',
+            myObject
+          ], function() {
+            db.executeSql('SELECT * FROM MyTable', [], function (res) {
+              expect(res.rows.item(0).data).toBe('Carol');
+              done();
+            });
+          }, function(error) {
+            expect(true).toBe(false);
+            done();
+          });
+          myObject.name = 'Carol';
+        }, MYTIMEOUT);
+
+        it(suiteName + 'batch sql with dynamic object for SQL arg value [INCONSISTENT BEHAVIOR]', function(done) {
+          // MyDynamicParameterObject "class":
+          function MyDynamicParameterObject() {this.name='Alice';};
+          MyDynamicParameterObject.prototype.toString = function() {return this.name;};
+
+          var myObject = new MyDynamicParameterObject();
+
+          // Check myObject:
+          expect(myObject.toString()).toBe('Alice');
+
+          var db = openDatabase('batch-sql-with-dynamic-object-for-sql-arg-value.db', '1.0', 'Test', DEFAULT_SIZE);
+
+          expect(db).toBeDefined();
+
+          myObject.name = 'Betty';
+          db.sqlBatch([
+            'DROP TABLE IF EXISTS MyTable',
+            'CREATE TABLE MyTable (data)',
+            [ 'INSERT INTO MyTable VALUES (?)', [myObject] ],
+          ], function() {
+            db.executeSql('SELECT * FROM MyTable', [], function (res) {
+              expect(res.rows.item(0).data).toBe('Carol');
+              done();
+            });
+          }, function(error) {
+            expect(true).toBe(false);
+            done();
+          });
+          myObject.name = 'Carol';
         }, MYTIMEOUT);
 
         it(suiteName + 'batch sql with syntax error', function(done) {
