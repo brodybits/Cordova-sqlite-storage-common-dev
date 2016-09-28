@@ -332,6 +332,12 @@ As "strongly recommended" by [Web SQL Database API 8.5 SQL injection](https://ww
 - In case of an issue that causes an API function to throw an exception (Android/iOS WebKit) Web SQL includes includes a code member with value of 0 (SQLError.UNKNOWN_ERR) in the exception while the plugin includes no such code member.
 - This plugin supports some non-standard features as documented below.
 - Results of SELECT with BLOB data such as `SELECT LOWER(X'40414243') AS myresult`, `SELECT X'40414243' AS myresult`, or reading data stored by `INSERT INTO MyTable VALUES (X'40414243')` are not consistent on Android in case the built-in Android database is used (using the `androidDatabaseImplementation: 2` setting in `window.sqlitePlugin.openDatabase`) or Windows. (These work with Android/iOS WebKit Web SQL and have been supported by SQLite for a number of years.)
+- In case of invalid transaction callback arguments such as string values the plugin attempts to execute the transaction while (WebKit) Web SQL would throw an exception. (This may cause the plugin to crash on Windows in case of a read-only transaction.)
+- The plugin handles invalid SQL arguments array values such as `false`, `true`, or a string as if there were no arguments while (WebKit) Web SQL would throw an exception.
+- In case of invalid SQL callback arguments such as string values the plugin may execute the SQL and signal transaction success or failure while (WebKit) Web SQL would throw an exception.
+- In certain cases such as `transaction.executeSql(null)` or `transaction.executeSql(undefined)` the plugin throws an exception while (WebKit) Web SQL indicates a transaction failure.
+- In certain cases such as `transaction.executeSql()` with no arguments (Android/iOS WebKit) Web SQL includes includes a code member with value of 0 (SQLError.UNKNOWN_ERR) in the exception while the plugin includes no such code member.
+- If the SQL arguments are passed in an `Array` subclass object where the `constructor` does not point to `Array` then the SQL arguments are ignored by the plugin.
 - The results data objects are not immutable as specified/implied by [Web SQL API section 4.5](https://www.w3.org/TR/webdatabase/#database-query-results).
 
 ### Security of deleted data
