@@ -707,6 +707,45 @@
 
       start2: (successcb, errorcb) ->
         SQLiteFactory.openDatabase {name: SelfTest.DBNAME, location: 'default'}, (db) ->
+          db.executeSql 'SELECT UPPER("Test") AS upperText', [], (resutSet) ->
+            ##
+            if !resutSet.rows
+              SelfTest.finishWithError errorcb, 'Missing resutSet.rows'
+              return
+
+            if !resutSet.rows.length
+              SelfTest.finishWithError errorcb, 'Missing resutSet.rows.length'
+              return
+
+            if resutSet.rows.length isnt 1
+              SelfTest.finishWithError errorcb,
+                "Incorrect resutSet.rows.length value: #{resutSet.rows.length} (expected: 1)"
+              return
+
+            if !resutSet.rows.item(0).upperText
+              SelfTest.finishWithError errorcb,
+                'Missing resutSet.rows.item(0).upperText'
+              return
+
+            if resutSet.rows.item(0).upperText isnt 'TEST'
+              SelfTest.finishWithError errorcb,
+                "Incorrect resutSet.rows.item(0).upperText value: #{resutSet.rows.item(0).data} (expected: 'TEST')"
+              return
+
+            # DELETE INTERNAL STATE to simulate the effects of location change:
+            delete db.openDBs[SelfTest.DBNAME]
+            delete txLocks[SelfTest.DBNAME]
+
+            SelfTest.start3 successcb, errorcb
+
+          , (select_err) ->
+            SelfTest.finishWithError errorcb, "SELECT error: #{select_err}"
+
+        , (open_err) ->
+          SelfTest.finishWithError errorcb, "Open database error: #{open_err}"
+
+      start3: (successcb, errorcb) ->
+        SQLiteFactory.openDatabase {name: SelfTest.DBNAME, location: 'default'}, (db) ->
           db.sqlBatch [
             'CREATE TABLE TestTable(id integer primary key autoincrement unique, data);'
             [ 'INSERT INTO TestTable (data) VALUES (?);', ['test-value'] ]
@@ -868,4 +907,3 @@
 
 #### vim: set filetype=coffee :
 #### vim: set expandtab :
-
