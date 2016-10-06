@@ -704,8 +704,52 @@
         SQLiteFactory.deleteDatabase {name: SelfTest.DBNAME, location: 'default'},
           (-> SelfTest.start2(successcb, errorcb)),
           (-> SelfTest.start2(successcb, errorcb))
+        return
 
       start2: (successcb, errorcb) ->
+        SQLiteFactory.openDatabase {name: SelfTest.DBNAME, location: 'default'}, (db) ->
+          db.transaction (tx) ->
+            tx.executeSql 'SELECT UPPER("Test") AS upperText', [], (ignored, resutSet) ->
+              if !resutSet.rows
+                SelfTest.finishWithError errorcb, 'Missing resutSet.rows'
+                return
+
+              if !resutSet.rows.length
+                SelfTest.finishWithError errorcb, 'Missing resutSet.rows.length'
+                return
+
+              if resutSet.rows.length isnt 1
+                SelfTest.finishWithError errorcb,
+                  "Incorrect resutSet.rows.length value: #{resutSet.rows.length} (expected: 1)"
+                return
+
+              if !resutSet.rows.item(0).upperText
+                SelfTest.finishWithError errorcb,
+                  'Missing resutSet.rows.item(0).upperText'
+                return
+
+              if resutSet.rows.item(0).upperText isnt 'TEST'
+                SelfTest.finishWithError errorcb,
+                  "Incorrect resutSet.rows.item(0).upperText value: #{resutSet.rows.item(0).data} (expected: 'TEST')"
+                return
+
+              # DELETE INTERNAL STATE to simulate the effects of location change:
+              delete db.openDBs[SelfTest.DBNAME]
+              delete txLocks[SelfTest.DBNAME]
+
+              SelfTest.start3 successcb, errorcb
+
+            , (sql_err) ->
+              SelfTest.finishWithError errorcb, "SQL error: #{sql_err}"
+
+          , (tx_err) ->
+            SelfTest.finishWithError errorcb, "TRANSACTION error: #{tx_err}"
+
+        , (open_err) ->
+          SelfTest.finishWithError errorcb, "Open database error: #{open_err}"
+        return
+
+      start3: (successcb, errorcb) ->
         SQLiteFactory.openDatabase {name: SelfTest.DBNAME, location: 'default'}, (db) ->
           db.sqlBatch [
             'CREATE TABLE TestTable(id integer primary key autoincrement unique, data);'
@@ -835,11 +879,13 @@
 
         , (open_err) ->
           SelfTest.finishWithError errorcb, "Open database error: #{open_err}"
+        return
 
       finishWithError: (errorcb, message) ->
         SQLiteFactory.deleteDatabase {name: SelfTest.DBNAME, location: 'default'}, ->
           errorcb newSQLError message
         , (err2)-> errorcb newSQLError "Cleanup error: #{err2} for error: #{message}"
+        return
 
 ## Exported API:
 
@@ -868,4 +914,3 @@
 
 #### vim: set filetype=coffee :
 #### vim: set expandtab :
-

@@ -624,7 +624,7 @@
   SelfTest = {
     DBNAME: '___$$$___litehelpers___$$$___test___$$$___.db',
     start: function(successcb, errorcb) {
-      return SQLiteFactory.deleteDatabase({
+      SQLiteFactory.deleteDatabase({
         name: SelfTest.DBNAME,
         location: 'default'
       }, (function() {
@@ -634,7 +634,47 @@
       }));
     },
     start2: function(successcb, errorcb) {
-      return SQLiteFactory.openDatabase({
+      SQLiteFactory.openDatabase({
+        name: SelfTest.DBNAME,
+        location: 'default'
+      }, function(db) {
+        return db.transaction(function(tx) {
+          return tx.executeSql('SELECT UPPER("Test") AS upperText', [], function(ignored, resutSet) {
+            if (!resutSet.rows) {
+              SelfTest.finishWithError(errorcb, 'Missing resutSet.rows');
+              return;
+            }
+            if (!resutSet.rows.length) {
+              SelfTest.finishWithError(errorcb, 'Missing resutSet.rows.length');
+              return;
+            }
+            if (resutSet.rows.length !== 1) {
+              SelfTest.finishWithError(errorcb, "Incorrect resutSet.rows.length value: " + resutSet.rows.length + " (expected: 1)");
+              return;
+            }
+            if (!resutSet.rows.item(0).upperText) {
+              SelfTest.finishWithError(errorcb, 'Missing resutSet.rows.item(0).upperText');
+              return;
+            }
+            if (resutSet.rows.item(0).upperText !== 'TEST') {
+              SelfTest.finishWithError(errorcb, "Incorrect resutSet.rows.item(0).upperText value: " + (resutSet.rows.item(0).data) + " (expected: 'TEST')");
+              return;
+            }
+            delete db.openDBs[SelfTest.DBNAME];
+            delete txLocks[SelfTest.DBNAME];
+            return SelfTest.start3(successcb, errorcb);
+          }, function(sql_err) {
+            return SelfTest.finishWithError(errorcb, "SQL error: " + sql_err);
+          });
+        }, function(tx_err) {
+          return SelfTest.finishWithError(errorcb, "TRANSACTION error: " + tx_err);
+        });
+      }, function(open_err) {
+        return SelfTest.finishWithError(errorcb, "Open database error: " + open_err);
+      });
+    },
+    start3: function(successcb, errorcb) {
+      SQLiteFactory.openDatabase({
         name: SelfTest.DBNAME,
         location: 'default'
       }, function(db) {
@@ -771,7 +811,7 @@
       });
     },
     finishWithError: function(errorcb, message) {
-      return SQLiteFactory.deleteDatabase({
+      SQLiteFactory.deleteDatabase({
         name: SelfTest.DBNAME,
         location: 'default'
       }, function() {

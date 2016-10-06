@@ -138,6 +138,7 @@ See the [Sample section](#sample) for a sample with a more detailed explanation.
 
 ## Announcements
 
+- Effect of refresh and location change is now covered by self test and supported for all platforms.
 - macOS ("osx" platform) is now supported
 - The [brodybits / Cordova-sqlite-bootstrap-test](https://github.com/brodybits/Cordova-sqlite-bootstrap-test) project is a CC0 (public domain) starting point to reproduce issues with this plugin and may be used as a quick way to start developing a new app.
 - New [litehelpers / Cordova-sqlite-evcore-extbuild-free](https://github.com/litehelpers/Cordova-sqlite-evcore-extbuild-free) version with Android JSON and SQL statement handling implemented in C, as well as support for PhoneGap Build, Intel XDK, etc., available with GPL or commercial license options. Handles large SQL batches in less than half the time as this version.
@@ -415,7 +416,6 @@ Some more limitations are tracked in the [open Cordova-sqlite-storage documentat
 ## Further testing needed
 
 - Integration with PhoneGap developer app
-- location reloads and changes/multi-page apps
 - Use within [InAppBrowser](http://docs.phonegap.com/en/edge/cordova_inappbrowser_inappbrowser.md.html)
 - Use within an iframe (see [litehelpers/Cordova-sqlite-storage#368 (comment)](https://github.com/litehelpers/Cordova-sqlite-storage/issues/368#issuecomment-154046367))
 - Maximum record size supported
@@ -468,7 +468,6 @@ Documented in: [brodybits / Avoiding-some-Cordova-pitfalls](https://github.com/b
 
 ## Major TODOs
 
-- Support location reloads and changes
 - Integrate with IndexedDBShim and some other libraries such as Sequelize, Squel.js, WebSqlSync, Persistence.js, Knex, etc.
 - Version with proper BLOB support
 - Further cleanup of [support](#support) section
