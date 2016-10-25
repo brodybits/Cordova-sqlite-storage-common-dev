@@ -1,5 +1,9 @@
 # Changes
 
+### cordova-sqlite-storage 1.4.9-browser-wip
+
+TBD
+
 ### cordova-sqlite-storage 1.4.8
 
 - selfTest function add string test and test of effects of location reload/change
