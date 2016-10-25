@@ -1542,7 +1542,7 @@ var mytests = function() {
           return window.sqlitePlugin.openDatabase(dbopts, okcb, errorcb);
         }
 
-        test_it(suiteName + "PRAGMAs & multiple database transactions mixed together", function() {
+        xtest_it(suiteName + "PRAGMAs & multiple database transactions mixed together", function() {
           var db = openDatabase("DB1", "1.0", "Demo", DEFAULT_SIZE);
 
           var db2 = openDatabase("DB2", "1.0", "Demo", DEFAULT_SIZE);

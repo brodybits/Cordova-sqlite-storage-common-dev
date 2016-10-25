@@ -2,7 +2,7 @@
 
 ### cordova-sqlite-storage 1.4.9-browser-wip
 
-TBD
+- Support browser platform
 
 ### cordova-sqlite-storage 1.4.8
 

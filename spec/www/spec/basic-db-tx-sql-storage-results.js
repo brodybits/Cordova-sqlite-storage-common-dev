@@ -631,7 +631,7 @@ var mytests = function() {
 
       describe(suiteName + 'NON-STANDARD SQL statement list test(s)', function() {
 
-        it(suiteName + 'INSERT statement list (NOT covered by Web SQL standard) - ' +
+        xit(suiteName + 'INSERT statement list (NOT covered by Web SQL standard) - ' +
            (isWebSql ? 'Web SQL ERROR' : 'DEVIATION - PLUGIN BROKEN (with potential data loss)'), function(done) {
           var db = openDatabase('INSERT-statement-list-test.db', '1.0', 'Test', DEFAULT_SIZE);
 
