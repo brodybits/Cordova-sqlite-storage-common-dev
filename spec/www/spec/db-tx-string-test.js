@@ -906,6 +906,25 @@ var mytests = function() {
           });
         }, MYTIMEOUT);
 
+        it(suiteName + "SELECT BASE64(X'010203') [BLOB value test]", function(done) {
+          if (isWebSql || isImpl2) pending('...');
+
+          var db = openDatabase("SELECT-BASE64-BLOB-test.db", "1.0", "Demo", DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+
+            tx.executeSql("SELECT BASE64(X'010203') AS base64_value", [], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).base64_value).toBe('___');
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            });
+          });
+        }, MYTIMEOUT);
+
       });
 
     });
