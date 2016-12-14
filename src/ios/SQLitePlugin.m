@@ -10,13 +10,10 @@
 
 #import "sqlite3.h"
 
-//#import "c64/cencode.h"
-#import "cencode.h"
+#import "sqlite3_base64.h"
 
-// FUTURE TBD (in another version branch):
+// XXX TODO GONE:
 //#define READ_BLOB_AS_BASE64
-
-// FUTURE TBD (in another version branch & TBD subjet to change):
 //#define INCLUDE_SQL_BLOB_BINDING
 
 // Defines Macro to only log lines when in DEBUG mode
@@ -25,29 +22,6 @@
 #else
 #   define DLog(...)
 #endif
-
-static void base64_udf(sqlite3_context * context, int argc, sqlite3_value ** argv) {
-  // TODO check argc
-
-  sqlite3_value * arg = argv[0];
-  const uint8_t * inblob = sqlite3_value_blob(arg);
-  size_t inlen = sqlite3_value_bytes(arg);
-
-  // TBD ???:
-  //char * out = sqlite3_malloc(inlen * 2);
-  //char * out = sqlite3_malloc(1000);
-
-  //sprintf(out, "GOT LENGTH: %d", inlen);
-
-  char * out = sqlite3_malloc(inlen * 2);
-
-  base64_encodestate es;
-  base64_init_encodestate(&es);
-
-  base64_encode_block(inblob, inlen, out, &es);
-
-  sqlite3_result_text(context, out, strlen(out), sqlite3_free);
-}
 
 @implementation SQLitePlugin
 
@@ -167,7 +141,7 @@ static void base64_udf(sqlite3_context * context, int argc, sqlite3_value ** arg
                 return;
             } else {
 
-                sqlite3_create_function(db, "base64", 1, SQLITE_ANY | SQLITE_DETERMINISTIC, NULL, base64_udf, NULL, NULL);
+                sqlite3_create_function(db, "base64", 1, SQLITE_ANY | SQLITE_DETERMINISTIC, NULL, sqlite3_base64, NULL, NULL);
 
                 // for SQLCipher version:
                 // NSString *dbkey = [options objectForKey:@"key"];

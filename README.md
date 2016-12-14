@@ -14,6 +14,8 @@ License for iOS/macOS version: MIT only
 
 This is the common version which supports the most widely used features and serves as the basis for the other versions.
 
+- XXX TODO doc, license, etc
+
 <!-- END About this version -->
 
 ## Available for hire

@@ -55,13 +55,11 @@
         <header-file src="src/ios/SQLitePlugin.h" />
         <source-file src="src/ios/SQLitePlugin.m" />
 
-        <header-file src="src/ios/cencode.h" />
-        <source-file src="src/ios/cencode.c" />
+        <header-file src="src/deps/sqlite3_base64.h" />
+        <source-file src="src/deps/sqlite3_base64.c" />
 
-        <!--
-        <header-file src="src/ios/b64/cencode.h" target-dir="b64" />
-        <source-file src="src/ios/b64/cencode.c" target-dir="b64" compiler-flags="-I. -I.." />
--->
+        <header-file src="src/deps/cencode.h" />
+        <source-file src="src/deps/cencode.c" />
 
         <header-file src="node_modules/cordova-sqlite-storage-dependencies/sqlite3.h" />
         <source-file src="node_modules/cordova-sqlite-storage-dependencies/sqlite3.c"
@@ -81,13 +79,11 @@
         <source-file src="src/ios/SQLitePlugin.m" />
         <!-- FUTURE TBD: more common directory name for Apple macOS/iOS versions -->
 
-        <header-file src="src/ios/cencode.h" />
-        <source-file src="src/ios/cencode.c" />
+        <header-file src="src/deps/sqlite3_base64.h" />
+        <source-file src="src/deps/sqlite3_base64.c" />
 
-        <!--
-        <header-file src="src/ios/b64/cencode.h" target-dir="b64" />
-        <source-file src="src/ios/b64/cencode.c" target-dir="b64" compiler-flags="-I. -I.." />
--->
+        <header-file src="src/deps/cencode.h" />
+        <source-file src="src/deps/cencode.c" />
 
         <header-file src="node_modules/cordova-sqlite-storage-dependencies/sqlite3.h" />
         <source-file src="node_modules/cordova-sqlite-storage-dependencies/sqlite3.c"
