@@ -1093,7 +1093,7 @@ nomem:
 static void
 freeset(struct parse *p, cset *cs)
 {
-	int i;
+	size_t i;
 	cset *top = &p->g->sets[p->g->ncsets];
 	size_t css = (size_t)p->g->csetsize;
 
@@ -1116,7 +1116,7 @@ static int			/* set number */
 freezeset(struct parse *p, cset *cs)
 {
 	uch h = cs->hash;
-	int i;
+	size_t i;
 	cset *top = &p->g->sets[p->g->ncsets];
 	cset *cs2;
 	size_t css = (size_t)p->g->csetsize;
@@ -1146,7 +1146,7 @@ freezeset(struct parse *p, cset *cs)
 static int			/* character; there is no "none" value */
 firstch(struct parse *p, cset *cs)
 {
-	int i;
+	size_t i;
 	size_t css = (size_t)p->g->csetsize;
 
 	for (i = 0; i < css; i++)
@@ -1162,7 +1162,7 @@ firstch(struct parse *p, cset *cs)
 static int
 nch(struct parse *p, cset *cs)
 {
-	int i;
+	size_t i;
 	size_t css = (size_t)p->g->csetsize;
 	int n = 0;
 

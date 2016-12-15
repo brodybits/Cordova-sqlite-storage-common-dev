@@ -53,3 +53,9 @@ typedef unsigned char uch;
 #ifdef USEBCOPY
 #define	memmove(d, s, c)	bcopy(s, d, c)
 #endif
+
+void *
+reallocarray(void *optr, size_t nmemb, size_t size);
+
+size_t
+strlcpy(char *dst, const char *src, size_t dsize);
