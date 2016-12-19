@@ -28,6 +28,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\node_modules\cordova-sqlite-storage-dependencies\sqlite3.c">
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\src\windows\regex\sqlite3_regexp.c">
+      <CompileAsWinRT>false</CompileAsWinRT>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\src\windows\regex\regcomp.c">
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
