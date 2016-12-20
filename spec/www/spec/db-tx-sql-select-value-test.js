@@ -1660,17 +1660,15 @@ var mytests = function() {
           });
         }, MYTIMEOUT);
 
-        it(suiteName + "SELECT X'40414243'", function(done) {
-          if (isWP8) pending('SKIP for WP8'); // [BROKEN: CRASH with uncaught exception]
-          if (!isWebSql && isAndroid && isImpl2) pending('SKIP: BROKEN for androidDatabaseImplementation: 2');
-          if (isWindows) pending('SKIP: BROKEN for Windows');
+        it(suiteName + "SELECT X'40414243' [TBD BROKEN androidDatabaseImplementation: 2 & Windows]", function(done) {
+          if (isWP8) pending('SKIP for WP8');
 
-          var db = openDatabase("Inline-BLOB-SELECT-result-test.db", "1.0", "Demo", DEFAULT_SIZE);
+          var db = openDatabase("SELECT-BLOB-40414243-result-test.db", "1.0", "Demo", DEFAULT_SIZE);
 
           db.transaction(function(tx) {
 
             tx.executeSql("SELECT X'40414243' AS myresult", [], function(ignored, rs) {
-              if (!isWebSql && isAndroid && isImpl2) expect('Behavior changed please update this test').toBe('--');
+              if (isWindows || (!isWebSql && isAndroid && isImpl2)) expect('Behavior changed please update this test').toBe('--');
               expect(rs).toBeDefined();
               expect(rs.rows).toBeDefined();
               expect(rs.rows.length).toBe(1);
@@ -1679,31 +1677,64 @@ var mytests = function() {
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             }, function(ignored, error) {
-              // NOT EXPECTED:
-              expect(false).toBe(true);
-              expect(error.message).toBe('---');
+              if (isWindows || (!isWebSql && isAndroid && isImpl2)) {
+                expect(error).toBeDefined();
+                expect(error.code).toBeDefined();
+                expect(error.message).toBeDefined();
+
+                // TBD wrong error code
+                expect(error.code).toBe(0);
+                // TBD error message
+              } else {
+                // NOT EXPECTED:
+                expect(false).toBe(true);
+                expect(error.message).toBe('---');
+              }
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          });
+        }, MYTIMEOUT);
 
-          }, function(error) {
-            if (!isWebSql && isAndroid && isImpl2) {
-              expect(error).toBeDefined();
-              expect(error.code).toBeDefined();
-              expect(error.message).toBeDefined();
+        it(suiteName + "SELECT X'FFD1FFD2' [TBD BROKEN androidDatabaseImplementation: 2 & Windows; missing result value iOS/macOS]", function(done) {
+          if (isWP8) pending('SKIP for WP8');
 
-              // TBD wrong error code
-              expect(error.code).toBe(0);
-              expect(error.message).toMatch(/error callback did not return false: unknown error.*code 0.*Unable to convert BLOB to string/);
-            } else {
-              // NOT EXPECTED:
-              expect(false).toBe(true);
-              expect(error.message).toBe('---');
-            }
+          var db = openDatabase("Inline-SELECT-BLOB-FFD1FFD2-result-test.db", "1.0", "Demo", DEFAULT_SIZE);
 
-            // Close (plugin only) & finish:
-            (isWebSql) ? done() : db.close(done, done);
+          db.transaction(function(tx) {
+
+            tx.executeSql("SELECT X'FFD1FFD2' AS myresult", [], function(ignored, rs) {
+              if (isWindows || (!isWebSql && isAndroid && isImpl2)) expect('Behavior changed please update this test').toBe('--');
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              if (!isWebSql && !isAndroid && !isWindows && !isWP8)
+                expect(rs.rows.item(0).myresult).not.toBeDefined(); // not defined iOS/macOS
+              else
+                expect(rs.rows.item(0).myresult).toBeDefined();
+              // TBD actual value (???)
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            }, function(ignored, error) {
+              if (isWindows || (!isWebSql && isAndroid && isImpl2)) {
+                expect(error).toBeDefined();
+                expect(error.code).toBeDefined();
+                expect(error.message).toBeDefined();
+
+                // TBD wrong error code
+                expect(error.code).toBe(0);
+                // TBD error message
+              } else {
+                // NOT EXPECTED:
+                expect(false).toBe(true);
+                expect(error.message).toBe('---');
+              }
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            });
           });
         }, MYTIMEOUT);
 
