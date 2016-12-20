@@ -2658,8 +2658,6 @@ var mytests = function() {
         }, MYTIMEOUT);
 
         it(suiteName + 'transaction.executeSql blank string test with callback function for parameter argument array [TBD (WebKit) Web SQL vs plugin]', function(done) {
-          //if (!isWebSql && !isAndroid && !isWindows && !isWP8) pending('SKIP for iOS plugin'); // TBD may break other tests on certain iOS versions
-
           var db = openDatabase("Inline-US-ASCII-string-test-with-callback-function-for-arg-array.db", "1.0", "Demo", DEFAULT_SIZE);
           expect(db).toBeDefined();
 
@@ -2685,8 +2683,6 @@ var mytests = function() {
         }, MYTIMEOUT);
 
         it(suiteName + 'readTransaction.executeSql blank string test with callback function for parameter argument array [TBD (WebKit) Web SQL vs plugin]', function(done) {
-          //if (!isWebSql && !isAndroid && !isWindows && !isWP8) pending('SKIP for iOS plugin'); // TBD may break other tests on certain iOS versions
-
           var db = openDatabase("Inline-US-ASCII-string-test-with-callback-function-for-arg-array-read-tx.db", "1.0", "Demo", DEFAULT_SIZE);
           expect(db).toBeDefined();
 
@@ -3050,10 +3046,7 @@ var mytests = function() {
           });
         }, MYTIMEOUT);
 
-        //* **
         it(suiteName + 'Inline US-ASCII blank string test with arguments array=function (BOGUS) in a try-catch block [TBD (WebKit) Web SQL vs plugin]', function(done) {
-          //if (!isAndroid && !isWindows && !isWP8) pending('SKIP for iOS'); // TBD may break other tests on certain iOS versions
-
           var db = openDatabase("Inline-US-ASCII-string-test-with-arguments-array-equals-true.db", "1.0", "Demo", DEFAULT_SIZE);
 
           db.transaction(function(transaction) {
@@ -3103,8 +3096,6 @@ var mytests = function() {
         }, MYTIMEOUT);
 
         it(suiteName + 'Inline US-ASCII blank string test with arguments array=function (BOGUS) in a try-catch block read tx [TBD (WebKit) Web SQL vs plugin]', function(done) {
-          //if (!isAndroid && !isWindows && !isWP8) pending('SKIP for iOS'); // TBD may break other tests on certain iOS versions
-
           var db = openDatabase("Inline-US-ASCII-string-test-with-arguments-array-equals-true-read-tx.db", "1.0", "Demo", DEFAULT_SIZE);
 
           db.readTransaction(function(readTransaction) {
@@ -3152,7 +3143,6 @@ var mytests = function() {
             (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
-        // */
 
         it(suiteName + "transaction.executeSql('SELECT 1') with string for success callback in a try-catch block (BOGUS)", function (done) {
           var db = openDatabase("tx-sql-with-string-for-success-cb.db", "1.0", "Demo", DEFAULT_SIZE);

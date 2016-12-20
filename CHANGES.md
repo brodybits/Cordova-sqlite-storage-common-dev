@@ -3,6 +3,7 @@
 #### cordova-sqlite-storage@legacy 1.4.10-pre1
 
 - Lawnchair adapter moved to a separate project
+- Test updates
 
 ### cordova-sqlite-storage 1.4.9
 
