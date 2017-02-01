@@ -232,10 +232,10 @@
             @startNextTransaction()
           return
 
-        openerrorcb = =>
+        openerrorcb = (ee) =>
           console.log 'OPEN database: ' + @dbname + ' FAILED, aborting any pending transactions'
           # XXX TODO: newSQLError missing the message part!
-          if !!error then error newSQLError 'Could not open database'
+          if !!error then error newSQLError 'Could not open database: ' + ee
           delete @openDBs[@dbname]
           @abortAllPendingTransactions()
           return

@@ -54,7 +54,7 @@ module.exports = {
 		} catch(ex) {
 			//fail(ex);
 			nextTick(function() {
-				fail(ex);
+				fail(JSON.stringify(ex));
 			});
 		}
 		//handle(res, win, fail);

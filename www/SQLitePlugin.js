@@ -192,10 +192,10 @@
         };
       })(this);
       openerrorcb = (function(_this) {
-        return function() {
+        return function(ee) {
           console.log('OPEN database: ' + _this.dbname + ' FAILED, aborting any pending transactions');
           if (!!error) {
-            error(newSQLError('Could not open database'));
+            error(newSQLError('Could not open database: ' + ee));
           }
           delete _this.openDBs[_this.dbname];
           _this.abortAllPendingTransactions();
