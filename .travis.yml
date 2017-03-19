@@ -24,6 +24,7 @@ script:
   - date && cp ${SPEC_WWW_DIR}/spec/db-tx-string-test.js ${TESTS_PATH} && ${CORDOVA_PARAMEDIC_CMD}
   - date && cp ${SPEC_WWW_DIR}/spec/db-tx-sql-select-value-test.js ${TESTS_PATH} && ${CORDOVA_PARAMEDIC_CMD}
   - date && cp ${SPEC_WWW_DIR}/spec/basic-db-tx-sql-storage-results.js ${TESTS_PATH} && ${CORDOVA_PARAMEDIC_CMD}
+  - date && cp ${SPEC_WWW_DIR}/spec/db-tx-insert-value-bindings-test.js ${TESTS_PATH} && ${CORDOVA_PARAMEDIC_CMD}
   - date && cp ${SPEC_WWW_DIR}/spec/db-sql-operations-test.js ${TESTS_PATH} && ${CORDOVA_PARAMEDIC_CMD}
   - date && cp ${SPEC_WWW_DIR}/spec/sql-batch-test.js ${TESTS_PATH} && ${CORDOVA_PARAMEDIC_CMD}
   - date && cp ${SPEC_WWW_DIR}/spec/db-tx-sql-features-test.js ${TESTS_PATH} && ${CORDOVA_PARAMEDIC_CMD}
@@ -32,6 +33,5 @@ script:
   - date && cp ${SPEC_WWW_DIR}/spec/db-tx-multiple-update-test.js ${TESTS_PATH} && ${CORDOVA_PARAMEDIC_CMD}
   - date && cp ${SPEC_WWW_DIR}/spec/tx-semantics-test.js ${TESTS_PATH} && ${CORDOVA_PARAMEDIC_CMD}
   - date && cp ${SPEC_WWW_DIR}/spec/db-tx-error-handling-test.js ${TESTS_PATH} && ${CORDOVA_PARAMEDIC_CMD}
-  - date && cp ${SPEC_WWW_DIR}/spec/db-tx-value-bindings-test.js ${TESTS_PATH} && ${CORDOVA_PARAMEDIC_CMD}
   - date && cp ${SPEC_WWW_DIR}/spec/db-tx-error-mapping-test.js ${TESTS_PATH} && ${CORDOVA_PARAMEDIC_CMD}
   - date
