@@ -51,7 +51,7 @@ var mytests = function() {
         }
       }
 
-      describe(suiteName + 'basic string binding/manipulation tests', function() {
+      describe(suiteName + 'Basic US-ASCII string binding/manipulation tests', function() {
 
         it(suiteName + 'Inline US-ASCII String manipulation test with empty ([]) parameter list', function(done) {
           var db = openDatabase("Inline-US-ASCII-string-test-with-empty-parameter-list.db", "1.0", "Demo", DEFAULT_SIZE);
@@ -61,12 +61,21 @@ var mytests = function() {
           db.transaction(function(tx) {
             expect(tx).toBeDefined();
 
-            tx.executeSql("SELECT UPPER('Some US-ASCII text') AS uppertext", [], function(tx, res) {
-              expect(res.rows.item(0).uppertext).toBe("SOME US-ASCII TEXT");
+            tx.executeSql("SELECT UPPER('Some US-ASCII text') AS uppertext", [], function(tx_ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).uppertext).toBe("SOME US-ASCII TEXT");
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
@@ -78,12 +87,21 @@ var mytests = function() {
           db.transaction(function(tx) {
             expect(tx).toBeDefined();
 
-            tx.executeSql("SELECT UPPER('Some US-ASCII text') AS uppertext", null, function(tx, res) {
-              expect(res.rows.item(0).uppertext).toBe("SOME US-ASCII TEXT");
+            tx.executeSql("SELECT UPPER('Some US-ASCII text') AS uppertext", null, function(tx_ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).uppertext).toBe("SOME US-ASCII TEXT");
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
@@ -95,12 +113,21 @@ var mytests = function() {
           db.transaction(function(tx) {
             expect(tx).toBeDefined();
 
-            tx.executeSql("SELECT UPPER('Some US-ASCII text') AS uppertext", undefined, function(tx, res) {
-              expect(res.rows.item(0).uppertext).toBe("SOME US-ASCII TEXT");
+            tx.executeSql("SELECT UPPER('Some US-ASCII text') AS uppertext", undefined, function(tx_ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).uppertext).toBe("SOME US-ASCII TEXT");
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
@@ -108,14 +135,48 @@ var mytests = function() {
           var db = openDatabase("ASCII-string-binding-test.db", "1.0", "Demo", DEFAULT_SIZE);
 
           db.transaction(function(tx) {
-            tx.executeSql('SELECT UPPER(?) AS uppertext', ['Some US-ASCII text'], function(tx, res) {
-              expect(res.rows.item(0).uppertext).toBe("SOME US-ASCII TEXT");
+            tx.executeSql('SELECT UPPER(?) AS uppertext', ['Some US-ASCII text'], function(tx_ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).uppertext).toBe("SOME US-ASCII TEXT");
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
+
+        it(suiteName + 'US-ASCII String HEX parameter value test ("Test 123")', function(done) {
+          var db = openDatabase("ASCII-String-hex-value-test.db", "1.0", "Demo", DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+
+            tx.executeSql('SELECT HEX(?) AS myresult', ['Test 123'], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).myresult).toBe('5465737420313233');
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
+          });
+        }, MYTIMEOUT);
+
+      });
 
         it(suiteName + 'tx.executeSql(new String(sql))', function(done) {
           var db = openDatabase("tx-executeSql-new-String-test.db", "1.0", "Demo", DEFAULT_SIZE);
@@ -123,15 +184,25 @@ var mytests = function() {
           db.transaction(function(tx) {
             expect(tx).toBeDefined();
 
-            tx.executeSql(new String("SELECT UPPER('Some US-ASCII text') AS uppertext"), [], function(tx, res) {
-              expect(res.rows.item(0).uppertext).toBe("SOME US-ASCII TEXT");
+            tx.executeSql(new String("SELECT UPPER('Some US-ASCII text') AS uppertext"), [], function(tx_ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).uppertext).toBe("SOME US-ASCII TEXT");
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
+        // TBD UNICODE \u0000 vs \0: are they the same in JavaScript?
         it(suiteName + 'String encoding test with UNICODE \\u0000', function (done) {
           if (isWP8) pending('BROKEN for WP(8)'); // [BUG #202] UNICODE characters not working with WP(8)
           if (isWindows) pending('BROKEN for Windows'); // [FUTURE TBD, already documented]
@@ -141,23 +212,35 @@ var mytests = function() {
           var db = openDatabase(dbName, "1.0", "Demo", DEFAULT_SIZE);
 
           db.transaction(function (tx) {
-            tx.executeSql('SELECT HEX("foob") AS hexvalue', [], function (tx, res) {
-              console.log(suiteName + "res.rows.item(0).hexvalue: " + res.rows.item(0).hexvalue);
+            tx.executeSql('SELECT HEX("foob") AS hexvalue', [], function (tx_ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              console.log(suiteName + "rs.rows.item(0).hexvalue: " + rs.rows.item(0).hexvalue);
+              // TBD ???:
+              expect(rs.rows.item(0).hexvalue).toBe('666F6F62');
 
-              var expected_hexvalue_length = res.rows.item(0).hexvalue.length;
+              var expected_hexvalue_length = rs.rows.item(0).hexvalue.length;
+              // TBD ???:
+              expect(expected_hexvalue_length).toBe(8);
 
-              tx.executeSql('SELECT HEX(?) AS hexvalue', ['\u0000foo'], function (tx, res) {
-                //console.log(suiteName + "res.rows.item(0).hexvalue: " + res.rows.item(0).hexvalue);
+              tx.executeSql('SELECT HEX(?) AS hexvalue', ['\u0000foo'], function (tx_ignored, rs2) {
+                expect(rs2).toBeDefined();
+                expect(rs2.rows).toBeDefined();
+                expect(rs2.rows.length).toBe(1);
+                expect(rs2.rows.item(0).hexvalue).toBeDefined();
 
-                expect(res.rows.length).toBe(1);
-                expect(res.rows.item(0).hexvalue).toBeDefined();
+                var hexvalue = rs2.rows.item(0).hexvalue;
+                // TBD ???:
+                expect(hexvalue).toBe('00666F6F');
+                expect(hexvalue.length).toBe(8);
 
-                var hexvalue = res.rows.item(0).hexvalue;
-
+                // TBD ???:
                 // varies between Chrome-like (UTF-8)
                 // and Safari-like (UTF-16)
                 expect(['000066006F006F00', '00666F6F'].indexOf(hexvalue)).not.toBe(-1);
 
+                // TBD ???:
                 // ensure this matches our expectation of that database's
                 // default encoding
                 expect(hexvalue.length).toBe(expected_hexvalue_length);
@@ -176,46 +259,65 @@ var mytests = function() {
           });
         }, MYTIMEOUT);
 
-        it(suiteName + "CR-LF String test", function(done) {
-          var db = openDatabase("CR-LF-String-test.db", "1.0", "Demo", DEFAULT_SIZE);
+      describe(suiteName + 'More US-ASCII string binding manipulation tests', function() {
+
+        // FUTURE TBD check results of HEX value & string value binding
+
+        it(suiteName + "INLINE CR-LF String test", function(done) {
+          var db = openDatabase("Inline-CR-LF-String-test.db", "1.0", "Demo", DEFAULT_SIZE);
           expect(db).toBeDefined();
 
           db.transaction(function(tx) {
             expect(tx).toBeDefined();
 
-            tx.executeSql("SELECT UPPER('cr\r\nlf') AS uppertext", [], function(tx, res) {
-              expect(res.rows.item(0).uppertext).not.toBe("CR\nLF"); // CR-LF should not be converted to \\n
-              expect(res.rows.item(0).uppertext).toBe("CR\r\nLF"); // Check CR-LF OK
-              tx.executeSql("SELECT UPPER('Carriage\rReturn') AS uppertext", [], function(tx, res) {
-                expect(res.rows.item(0).uppertext).toBe("CARRIAGE\rRETURN"); // Check CR OK
-                tx.executeSql("SELECT UPPER('New\nLine') AS uppertext", [], function(tx, res) {
-                  expect(res.rows.item(0).uppertext).toBe("NEW\nLINE"); // CHECK newline OK
+            tx.executeSql("SELECT UPPER('cr\r\nlf') AS uppertext", [], function(tx_ignored, rs) {
+              expect(rs.rows.item(0).uppertext).not.toBe("CR\nLF"); // CR-LF should not be converted to \\n
+              expect(rs.rows.item(0).uppertext).toBe("CR\r\nLF"); // Check CR-LF OK
+              tx.executeSql("SELECT UPPER('Carriage\rReturn') AS uppertext", [], function(tx_ignored, rs2) {
+                expect(rs2.rows.item(0).uppertext).toBe("CARRIAGE\rRETURN"); // Check CR OK
+                tx.executeSql("SELECT UPPER('New\nLine') AS uppertext", [], function(tx_ignored, rs3) {
+                  expect(rs3.rows.item(0).uppertext).toBe("NEW\nLINE"); // CHECK newline OK
 
                   // Close (plugin only) & finish:
                   (isWebSql) ? done() : db.close(done, done);
                 });
               });
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
-        it(suiteName + "String tab test", function(done) {
-          var db = openDatabase("String-tab-test.db", "1.0", "Demo", DEFAULT_SIZE);
+        it(suiteName + "INLINE string tab test", function(done) {
+          var db = openDatabase("Inline-string-tab-test.db", "1.0", "Demo", DEFAULT_SIZE);
           expect(db).toBeDefined();
 
           db.transaction(function(tx) {
             expect(tx).toBeDefined();
 
-            tx.executeSql("SELECT UPPER('first\tsecond') AS uppertext", [], function(tx, res) {
-              expect(res.rows.item(0).uppertext).toBe('FIRST\tSECOND');
+            tx.executeSql("SELECT UPPER('first\tsecond') AS uppertext", [], function(tx_ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).uppertext).toBe('FIRST\tSECOND');
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
-        it(suiteName + "String vertical tab test", function(done) {
+        it(suiteName + "INLINE string vertical tab test", function(done) {
           if (isWP8) pending('BROKEN for WP(8)'); // [BUG #202] UNICODE characters not working with WP(8)
 
           var db = openDatabase("String-vertical-tab-test.db", "1.0", "Demo", DEFAULT_SIZE);
@@ -224,16 +326,25 @@ var mytests = function() {
           db.transaction(function(tx) {
             expect(tx).toBeDefined();
 
-            tx.executeSql("SELECT UPPER('first\vsecond') AS uppertext", [], function(tx, res) {
-              expect(res.rows.item(0).uppertext).toBe('FIRST\vSECOND');
+            tx.executeSql("SELECT UPPER('first\vsecond') AS uppertext", [], function(tx_ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).uppertext).toBe('FIRST\vSECOND');
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
-        it(suiteName + "String form feed test", function(done) {
+        it(suiteName + "INLINE string form feed test", function(done) {
           if (isWP8) pending('BROKEN for WP(8)'); // [BUG #202] UNICODE characters not working with WP(8)
 
           var db = openDatabase("String-form-feed-test.db", "1.0", "Demo", DEFAULT_SIZE);
@@ -242,16 +353,25 @@ var mytests = function() {
           db.transaction(function(tx) {
             expect(tx).toBeDefined();
 
-            tx.executeSql("SELECT UPPER('first\fsecond') AS uppertext", [], function(tx, res) {
-              expect(res.rows.item(0).uppertext).toBe('FIRST\fSECOND');
+            tx.executeSql("SELECT UPPER('first\fsecond') AS uppertext", [], function(tx_ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).uppertext).toBe('FIRST\fSECOND');
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
-        it(suiteName + "String backspace test", function(done) {
+        it(suiteName + "INLINE string backspace test", function(done) {
           if (isWP8) pending('BROKEN for WP(8)'); // [BUG #202] UNICODE characters not working with WP(8)
 
           var db = openDatabase("String-backspace-test.db", "1.0", "Demo", DEFAULT_SIZE);
@@ -260,12 +380,127 @@ var mytests = function() {
           db.transaction(function(tx) {
             expect(tx).toBeDefined();
 
-            tx.executeSql("SELECT UPPER('first\bsecond') AS uppertext", [], function(tx, res) {
-              expect(res.rows.item(0).uppertext).toBe('FIRST\bSECOND');
+            tx.executeSql("SELECT UPPER('first\bsecond') AS uppertext", [], function(tx_ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).uppertext).toBe('FIRST\bSECOND');
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
+          });
+        }, MYTIMEOUT);
+
+      });
+
+      describe(suiteName + 'Multi-byte UTF-8 string binding/manipulation tests', function() {
+
+        it(suiteName + 'UTF-8 string HEX parameter value test with 2-byte character (é)', function(done) {
+          var db = openDatabase("UTF8-2-byte-string-hex-value-test.db", "1.0", "Demo", DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+
+            tx.executeSql('SELECT HEX(?) AS myresult', ['1é'], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).myresult).toBe('31C3A9');
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'UTF-8 string parameter value manipulation test with 2-byte character (é)', function(done) {
+          var db = openDatabase("UTF8-2-byte-string-upper-value-test.db", "1.0", "Demo", DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+
+            tx.executeSql('SELECT UPPER(?) AS myresult', ['aé'], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              if (isAndroid && (isWebSql || (isImpl2 && /Android [5-9]/.test(navigator.userAgent))))
+                expect(rs.rows.item(0).myresult).toBe('AÉ');
+              else
+                expect(rs.rows.item(0).myresult).toBe('Aé');
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
+          });
+        }, MYTIMEOUT);
+
+        // TBD BUG XXX:
+        // The following test show TBD: ...
+
+        it(suiteName + 'UTF-8 string HEX parameter value test with 3-byte character (€)', function(done) {
+          if (isWP8) pending('SKIP for WP(8)');
+
+          var db = openDatabase("UTF8-3-byte-string-hex-value-test.db", "1.0", "Demo", DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+
+            tx.executeSql('SELECT HEX(?) AS myresult', ['1€'], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).myresult).toBe('31E282AC');
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'UTF-8 string parameter value manipulation test with 3-byte character (€)', function(done) {
+          if (isWP8) pending('SKIP for WP(8)');
+
+          var db = openDatabase("UTF8-3-byte-string-upper-value-test.db", "1.0", "Demo", DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+
+            tx.executeSql('SELECT UPPER(?) AS myresult', ['a€'], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).myresult).toBe('A€');
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
@@ -285,12 +520,21 @@ var mytests = function() {
           db.transaction(function(tx) {
             expect(tx).toBeDefined();
 
-            tx.executeSql('SELECT UPPER("a\uD83D\uDE03.") AS uppertext', [], function(tx, res) {
-              expect(res.rows.item(0).uppertext).toBe('A\uD83D\uDE03.');
+            tx.executeSql('SELECT UPPER("a\uD83D\uDE03.") AS uppertext', [], function(tx_ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).uppertext).toBe('A\uD83D\uDE03.');
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
@@ -305,12 +549,21 @@ var mytests = function() {
           db.transaction(function(tx) {
             expect(tx).toBeDefined();
 
-            tx.executeSql('SELECT HEX("@\uD83D\uDE03!") AS hexvalue', [], function(tx, res) {
-              expect(res.rows.item(0).hexvalue).toBe('40F09F988321');
+            tx.executeSql('SELECT HEX("@\uD83D\uDE03!") AS hexvalue', [], function(tx_ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).hexvalue).toBe('40F09F988321');
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
@@ -325,13 +578,21 @@ var mytests = function() {
           db.transaction(function(tx) {
             expect(tx).toBeDefined();
 
-            tx.executeSql("SELECT LOWER(X'41F09F9883') AS lowertext", [], function(ignored, res) {
-              expect(res).toBeDefined();
-              expect(res.rows.item(0).lowertext).toBe('a\uD83D\uDE03');
+            tx.executeSql("SELECT LOWER(X'41F09F9883') AS lowertext", [], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).lowertext).toBe('a\uD83D\uDE03');
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
@@ -346,22 +607,32 @@ var mytests = function() {
           db.transaction(function(tx) {
             expect(tx).toBeDefined();
 
-            tx.executeSql('SELECT HEX(?) AS hexvalue', ['@\uD83D\uDE03!'], function(tx, res) {
-              expect(res.rows.item(0).hexvalue).toBe('40F09F988321');
+            tx.executeSql('SELECT HEX(?) AS hexvalue', ['@\uD83D\uDE03!'], function(tx_ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).hexvalue).toBe('40F09F988321');
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
-        // NOTE: the next two tests show that for iOS/macOS/Android:
+        // NOTE: the next 3 tests show that for iOS/macOS/Android:
         // - UNICODE \u2028 line separator from JavaScript to native (Objective-C/Java) is working OK
         // - UNICODE \u2028 line separator from native (Objective-C/Java) to JavaScript is BROKEN
         // For reference:
         // - litehelpers/Cordova-sqlite-storage#147
         // - Apache Cordova CB-9435 (issue with cordova-ios, also affects macOS)
         // - cordova/cordova-discuss#57 (issue with cordova-android)
+
         it(suiteName + "UNICODE \\u2028 line separator string length", function(done) {
           if (isWP8) pending('BROKEN for WP(8)'); // [BUG #202] Certain UNICODE characters not working with WP(8)
 
@@ -374,12 +645,46 @@ var mytests = function() {
           db.transaction(function(tx) {
             expect(tx).toBeDefined();
 
-            tx.executeSql("select length(?) AS stringlength", ['First\u2028Second'], function (tx, res) {
-              expect(res.rows.item(0).stringlength).toBe(12);
+            tx.executeSql("select length(?) AS stringlength", ['First\u2028Second'], function (tx_ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
+              expect(rs.rows.item(0).stringlength).toBe(12);
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'HEX value of string with UNICODE \\u2028 line separator', function(done) {
+          // NOTE: this test verifies that the UNICODE line separator (\u2028)
+          // is seen by the sqlite implementation OK:
+          var db = openDatabase("UNICODE-line-separator-hex-value-test.db", "1.0", "Demo", DEFAULT_SIZE);
+
+          expect(db).toBeDefined();
+
+          db.transaction(function(tx) {
+            expect(tx).toBeDefined();
+
+            tx.executeSql('SELECT HEX(?) AS myresult', ['1\u2028'], function (tx_ignored, rs) {
+              expect(rs.rows.item(0).myresult).toBe('31E280A8');
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
@@ -398,17 +703,23 @@ var mytests = function() {
           db.transaction(function(tx) {
             expect(tx).toBeDefined();
 
-            tx.executeSql("SELECT LOWER(?) AS lowertext", ['First\u2028Second'], function (tx, res) {
-              expect(res).toBeDefined();
-              expect(res.rows.item(0).lowertext).toBe("first\u2028second");
+            tx.executeSql("SELECT LOWER(?) AS lowertext", ['First\u2028Second'], function (tx_ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows.item(0).lowertext).toBe("first\u2028second");
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
-        // NOTE: the next two tests repeat the above for UNICODE \u2029 paragraph separator
+        // NOTE: the next 3 tests repeat the above for UNICODE \u2029 paragraph separator
         // on iOS/macOS/Android:
         // - UNICODE \u2029 paragraph separator from JavaScript to native (Objective-C/Java) is working OK
         // - UNICODE \u2029 paragraph separator from native (Objective-C/Java) to JavaScript is BROKEN
@@ -416,6 +727,7 @@ var mytests = function() {
         // - litehelpers/Cordova-sqlite-storage#147
         // - Apache Cordova CB-9435 (issue with cordova-ios, also affects macOS)
         // - cordova/cordova-discuss#57 (issue with cordova-android)
+
         it(suiteName + "UNICODE \\u2029 paragraph separator string length", function(done) {
           if (isWP8) pending('BROKEN for WP(8)'); // [BUG #202] Certain UNICODE characters not working with WP(8)
 
@@ -429,12 +741,43 @@ var mytests = function() {
             expect(tx).toBeDefined();
 
             var text = 'Abcd\u20281234';
-            tx.executeSql("select length(?) AS stringlength", ['First\u2029Second'], function (tx, res) {
-              expect(res.rows.item(0).stringlength).toBe(12);
+            tx.executeSql("select length(?) AS stringlength", ['First\u2029Second'], function (tx_ignored, rs) {
+              expect(rs.rows.item(0).stringlength).toBe(12);
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'HEX value of string with UNICODE \\u2029 paragraph separator', function(done) {
+          // NOTE: this test verifies that the UNICODE paragraph separator (\u2029)
+          // is seen by the sqlite implementation OK:
+          var db = openDatabase("UNICODE-paragraph-separator-hex-value-test.db", "1.0", "Demo", DEFAULT_SIZE);
+
+          expect(db).toBeDefined();
+
+          db.transaction(function(tx) {
+            expect(tx).toBeDefined();
+
+            tx.executeSql('SELECT HEX(?) AS myresult', ['1\u2029'], function (tx_ignored, rs) {
+              expect(rs.rows.item(0).myresult).toBe('31E280A9');
+
+              // Close (plugin only) & finish:
+              (isWebSql) ? done() : db.close(done, done);
+            });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
@@ -453,24 +796,33 @@ var mytests = function() {
           db.transaction(function(tx) {
             expect(tx).toBeDefined();
 
-            tx.executeSql("SELECT LOWER(?) AS lowertext", ['First\u2029Second'], function (tx, res) {
-              expect(res).toBeDefined();
-              expect(res.rows.item(0).lowertext).toBe("first\u2029second");
+            tx.executeSql("SELECT LOWER(?) AS lowertext", ['First\u2029Second'], function (tx_ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows.item(0).lowertext).toBe("first\u2029second");
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
-        it(suiteName + 'UTF-8 string test', function(done) {
+        it(suiteName + 'Inline UTF-8 string manipulation test with 2/3 byte characters', function(done) {
           if (isWP8) pending('SKIP for WP(8)');
 
-          var db = openDatabase("UTF8-string-test.db", "1.0", "Demo", DEFAULT_SIZE);
+          var db = openDatabase("Inline-UTF8-string-manipulation-test.db", "1.0", "Demo", DEFAULT_SIZE);
 
           db.transaction(function(tx) {
 
             tx.executeSql("SELECT UPPER('Test ¢ é €') AS upper_result", [], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
               if (isAndroid && (isWebSql || (isImpl2 && /Android [5-9]/.test(navigator.userAgent))))
                 expect(rs.rows.item(0).upper_result).toBe('TEST ¢ É €');
               else
@@ -479,17 +831,26 @@ var mytests = function() {
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
-        it(suiteName + 'UTF-8 string binding test', function(done) {
+        it(suiteName + 'EXTRA UTF-8 string parameter manipulation test with 2/3 byte characters', function(done) {
           if (isWP8) pending('SKIP for WP(8)');
 
-          var db = openDatabase("UTF8-string-binding-test.db", "1.0", "Demo", DEFAULT_SIZE);
+          var db = openDatabase("UTF8-string-parameter-manipulation-test.db", "1.0", "Demo", DEFAULT_SIZE);
 
           db.transaction(function(tx) {
 
             tx.executeSql('SELECT UPPER(?) AS upper_result', ['Test ¢ é €'], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
               if (isAndroid && (isWebSql || (isImpl2 && /Android [5-9]/.test(navigator.userAgent))))
                 expect(rs.rows.item(0).upper_result).toBe('TEST ¢ É €');
               else
@@ -498,20 +859,41 @@ var mytests = function() {
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
-        it(suiteName + 'Double-quote string test', function(done) {
-          var db = openDatabase("Double-quote-string-test.db", "1.0", "Demo", DEFAULT_SIZE);
+      });
+
+      describe(suiteName + 'Additional US-ASCII string binding/manipulation tests', function() {
+
+        // TBD CHECK HEX value results
+
+        it(suiteName + 'INLINE Double-quote string manipulation test', function(done) {
+          var db = openDatabase("INLINE-Double-quote-string-test.db", "1.0", "Demo", DEFAULT_SIZE);
 
           db.transaction(function(tx) {
 
             tx.executeSql("SELECT UPPER('\"String\" test') AS upper_result", [], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
               expect(rs.rows.item(0).upper_result).toBe('"STRING" TEST');
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
@@ -521,25 +903,43 @@ var mytests = function() {
           db.transaction(function(tx) {
 
             tx.executeSql('SELECT UPPER(?) AS upper_result', ['"String" test'], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
               expect(rs.rows.item(0).upper_result).toBe('"STRING" TEST');
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
-        it(suiteName + 'Backslash string test', function(done) {
-          var db = openDatabase("Backslash-string-test.db", "1.0", "Demo", DEFAULT_SIZE);
+        it(suiteName + 'INLINE Backslash string test', function(done) {
+          var db = openDatabase("INLINE-Backslash-string-test.db", "1.0", "Demo", DEFAULT_SIZE);
 
           db.transaction(function(tx) {
 
             tx.executeSql("SELECT UPPER('Test \\') AS upper_result", [], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
               expect(rs.rows.item(0).upper_result).toBe('TEST \\');
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
@@ -549,11 +949,20 @@ var mytests = function() {
           db.transaction(function(tx) {
 
             tx.executeSql('SELECT UPPER(?) AS upper_result', ['Test \\'], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
               expect(rs.rows.item(0).upper_result).toBe('TEST \\');
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
@@ -567,11 +976,20 @@ var mytests = function() {
           db.transaction(function(tx) {
 
             tx.executeSql('SELECT UPPER(?) AS upper_result', [['Test',null,123.456,789]], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
               expect(rs.rows.item(0).upper_result).toBe('TEST,,123.456,789');
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
@@ -581,11 +999,20 @@ var mytests = function() {
           db.transaction(function(tx) {
 
             tx.executeSql('SELECT UPPER(?) AS upper_result', [new String('Test value')], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
               expect(rs.rows.item(0).upper_result).toBe('TEST VALUE');
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
@@ -605,11 +1032,20 @@ var mytests = function() {
           db.transaction(function(tx) {
 
             tx.executeSql('SELECT UPPER(?) AS upper_result', [myObject], function(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
               expect(rs.rows.item(0).upper_result).toBe('TOSTRING RESULT');
 
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
       });
@@ -776,13 +1212,19 @@ var mytests = function() {
               (isWebSql) ? done() : db.close(done, done);
             });
             myObject.name = 'Carol';
+
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 
       });
 
       describe(suiteName + 'string test with Array "subclass" for SQL parameter arg values array', function() {
-        ;
         it(suiteName + 'SELECT UPPER(?) AS upper1, UPPER(?) AS upper2 with "naive" Array subclass (constructor NOT explicitly set) as value arguments array', function(done) {
           var db = openDatabase('SELECT-multi-upper-on-array-subclass.db');
           expect(db).toBeDefined();
@@ -804,6 +1246,7 @@ var mytests = function() {
 
           db.transaction(function(tx) {
             tx.executeSql('SELECT UPPER(?) AS upper1, UPPER(?) AS upper2', myObject, function(ignored, rs) {
+              // EXPECTED RESULT:
               expect(rs).toBeDefined();
               expect(rs.rows).toBeDefined();
               expect(rs.rows.length).toBe(1);
@@ -941,6 +1384,9 @@ var mytests = function() {
 
           db.transaction(function(tx) {
             tx.executeSql('SELECT UPPER(?) AS uppertext', ['Some US-ASCII text'], function success(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
               expect(rs.rows.item(0).uppertext).toBe("SOME US-ASCII TEXT");
 
               // Close (plugin only) & finish:
@@ -964,6 +1410,9 @@ var mytests = function() {
 
           db.readTransaction(function(tx) {
             tx.executeSql('SELECT UPPER(?) AS uppertext', ['Some US-ASCII text'], function success(ignored, rs) {
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
               expect(rs.rows.item(0).uppertext).toBe("SOME US-ASCII TEXT");
 
               // Close (plugin only) & finish:
@@ -991,6 +1440,9 @@ var mytests = function() {
 
             tx.executeSql("SELECT UPPER('Some US-ASCII text') AS uppertext", null, function(ignored, rs) {
               check1 = true;
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
               expect(rs.rows.item(0).uppertext).toBe("SOME US-ASCII TEXT");
             });
           }, function error(error) {
@@ -1019,6 +1471,9 @@ var mytests = function() {
 
             tx.executeSql("SELECT UPPER('Some US-ASCII text') AS uppertext", null, function(ignored, rs) {
               check1 = true;
+              expect(rs).toBeDefined();
+              expect(rs.rows).toBeDefined();
+              expect(rs.rows.length).toBe(1);
               expect(rs.rows.item(0).uppertext).toBe("SOME US-ASCII TEXT");
             });
           }, function error(error) {
@@ -1056,6 +1511,13 @@ var mytests = function() {
               // Close (plugin only) & finish:
               (isWebSql) ? done() : db.close(done, done);
             });
+
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('--');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
           });
         }, MYTIMEOUT);
 

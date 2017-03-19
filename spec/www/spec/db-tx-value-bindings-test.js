@@ -51,7 +51,7 @@ var mytests = function() {
 
   for (var i=0; i<scenarioCount; ++i) {
 
-    describe(scenarioList[i] + ': tx INSERT value bindings test(s)', function() {
+    describe(scenarioList[i] + ': tx INSERT storage value bindings test(s)', function() {
       var scenarioName = scenarioList[i];
       var suiteName = scenarioName + ': ';
       var isWebSql = (i === 1);
@@ -76,6 +76,117 @@ var mytests = function() {
       }
 
       describe(suiteName + 'transaction column value insertion test(s)', function() {
+
+        it(suiteName + 'INSERT US-ASCII TEXT string ("Test 123"), SELECT the data, check, and check HEX value', function(done) {
+          var db = openDatabase('INSERT-ascii-text-string-and-check.db', '1.0', 'Demo', DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+            tx.executeSql('DROP TABLE IF EXISTS test_table');
+            tx.executeSql('CREATE TABLE IF NOT EXISTS test_table (data)', [], function(ignored1, ignored2) {
+
+              tx.executeSql('INSERT INTO test_table VALUES (?)', ['Test 123'], function(tx, res) {
+
+                expect(res).toBeDefined();
+                expect(res.rowsAffected).toBe(1);
+
+                tx.executeSql('SELECT * FROM test_table', [], function(tx, res) {
+                  var row = res.rows.item(0);
+
+                  expect(row.data).toBe('Test 123');
+
+                  tx.executeSql('SELECT HEX(data) AS hexvalue FROM test_table', [], function(tx, res) {
+                    expect(res.rows.item(0).hexvalue).toBe('5465737420313233');
+
+                    // Close (plugin only) & finish:
+                    (isWebSql) ? done() : db.close(done, done);
+                  });
+
+                });
+              });
+            });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('---');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
+          });
+        }, MYTIMEOUT);
+
+        it(suiteName + 'INSERT TEXT string with UTF-8 é (2 bytes), SELECT the data, check, and check HEX value', function(done) {
+          var db = openDatabase('INSERT-UTF8-2-bytes-and-check.db', '1.0', 'Demo', DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+            tx.executeSql('DROP TABLE IF EXISTS test_table');
+            tx.executeSql('CREATE TABLE IF NOT EXISTS test_table (data)', [], function(ignored1, ignored2) {
+
+              tx.executeSql('INSERT INTO test_table VALUES (?)', ['é'], function(tx, res) {
+
+                expect(res).toBeDefined();
+                expect(res.rowsAffected).toBe(1);
+
+                tx.executeSql('SELECT * FROM test_table', [], function(tx, res) {
+                  var row = res.rows.item(0);
+
+                  expect(row.data).toBe('é');
+
+                  tx.executeSql('SELECT HEX(data) AS hexvalue FROM test_table', [], function(tx, res) {
+                    expect(res.rows.item(0).hexvalue).toBe('C3A9');
+
+                    // Close (plugin only) & finish:
+                    (isWebSql) ? done() : db.close(done, done);
+                  });
+
+                });
+              });
+            });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('---');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
+          });
+        }, MYTIMEOUT);
+
+        // TBD NOTE: ...
+        it(suiteName + 'INSERT TEXT string with UTF-8 € (3 bytes), SELECT the data, check, and check HEX value', function(done) {
+          var db = openDatabase('INSERT-UTF8-3-bytes-and-check.db', '1.0', 'Demo', DEFAULT_SIZE);
+
+          db.transaction(function(tx) {
+            tx.executeSql('DROP TABLE IF EXISTS test_table');
+            tx.executeSql('CREATE TABLE IF NOT EXISTS test_table (data)', [], function(ignored1, ignored2) {
+
+              tx.executeSql('INSERT INTO test_table VALUES (?)', ['€'], function(tx, res) {
+
+                expect(res).toBeDefined();
+                expect(res.rowsAffected).toBe(1);
+
+                tx.executeSql('SELECT * FROM test_table', [], function(tx, res) {
+                  var row = res.rows.item(0);
+
+                  expect(row.data).toBe('€');
+
+                  tx.executeSql('SELECT HEX(data) AS hexvalue FROM test_table', [], function(tx, res) {
+                    // TBD ...
+                    //if (!isWebSql && !isWindows && !isWP8 && !(isAndroid && !isImpl2))
+                      expect(res.rows.item(0).hexvalue).toBe('E282AC');
+
+                    // Close (plugin only) & finish:
+                    (isWebSql) ? done() : db.close(done, done);
+                  });
+
+                });
+              });
+            });
+          }, function(error) {
+            // NOT EXPECTED:
+            expect(false).toBe(true);
+            expect(error.message).toBe('---');
+            // Close (plugin only) & finish:
+            (isWebSql) ? done() : db.close(done, done);
+          });
+        }, MYTIMEOUT);
 
         it(suiteName + 'INSERT with null parameter argument value and check stored data', function(done) {
           var db = openDatabase('INSERT-null-arg-value-and-check.db', '1.0', 'Demo', DEFAULT_SIZE);
