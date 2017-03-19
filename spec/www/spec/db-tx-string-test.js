@@ -29,8 +29,12 @@ var mytests = function() {
       var isWebSql = (i === 1);
       var isImpl2 = (i === 2);
 
-      // NOTE: MUST be defined in proper describe function scope, NOT outer scope:
-      var openDatabase = function(name, ignored1, ignored2, ignored3) {
+      // NOTE: MUST be defined in proper describe function scope, NOT outer scope.
+      // NOTE 2: Using same database name in this script to avoid issue with
+      //         "Too many open files" on iOS with WKWebView engine plugin.
+      //         (FUTURE TBD NEEDS INVESTIGATION)
+      var openDatabase = function(name_ignored, ignored1, ignored2, ignored3) {
+        var name = 'string-test.db';
         if (isImpl2) {
           return window.sqlitePlugin.openDatabase({
             // prevent reuse of database from default db implementation:
