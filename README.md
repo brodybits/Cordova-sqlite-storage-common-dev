@@ -150,6 +150,7 @@ See the [Sample section](#sample) for a sample with a more detailed explanation.
   - Not possible to read BLOB column values
   - It is **not** possible to use this plugin with the default "Any CPU" target. A specific target CPU type **must** be specified when building an app with this plugin.
   - This version branch with dependency on platform toolset libraries included by Visual Studio 2015 ref: [litehelpers/Cordova-sqlite-storage#580](https://github.com/litehelpers/Cordova-sqlite-storage/issues/580)
+  - Windows version uses `UTF-16le` internal database encoding while the other platform versions use `UTF-8` internal encoding. (`UTF-8` internal encoding is preferred ref: [litehelpers/Cordova-sqlite-storage#652](https://github.com/litehelpers/Cordova-sqlite-storage/issues/652))
 - macOS version ("osx" platform) has not been tested in a release build and should be considered pre-alpha.
 - FTS3, FTS4, and R-Tree support is tested working OK in this version (for all target platforms in this version branch Android/iOS/macOS/Windows)
 - Android is supported back to SDK 10 (a.k.a. Gingerbread, Android 2.3.3); support for older versions is available upon request.
