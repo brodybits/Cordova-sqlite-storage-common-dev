@@ -3,12 +3,28 @@
 #include "Database.h"
 #include "Statement.h"
 
+#include <string>
+#include <codecvt>
+
 namespace SQLite3
 {
   Database::Database(Platform::String^ dbPath)
     : sqlite(nullptr)
   {
+#if 1
     int ret = sqlite3_open16(dbPath->Data(), &sqlite);
+#else
+    // THANKS FOR GUIDANCE (example):
+    // http://en.cppreference.com/w/cpp/locale/wstring_convert/to_bytes
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
+
+    // NOTE: This is done to open a database with UTF-8 internal encoding
+    // ref: litehelpers/Cordova-sqlite-storage#652
+    const char * dbName =
+      myconv.to_bytes(dbPath->Data()).c_str();
+
+    int ret = sqlite3_open(dbName, &sqlite);
+#endif
 
     if (ret != SQLITE_OK)
     {
