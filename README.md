@@ -92,7 +92,7 @@ Use the `location` or `iosDatabaseLocation` option in `sqlitePlugin.openDatabase
   - Pre-populated database (Android/iOS/macOS/Windows)
 - Amazon Fire-OS is dropped due to lack of support by Cordova. Android version should be used to deploy to Fire-OS 5.0(+) devices. For reference: [cordova/cordova-discuss#32 (comment)](https://github.com/cordova/cordova-discuss/issues/32#issuecomment-167021676)
 - Windows version using the performant C++ [doo / SQLite3-WinRT](https://github.com/doo/SQLite3-WinRT) component is in an alpha state:
-  - Issue with UNICODE `\u0000` character (same as `\0`)
+  - ~~Issue with UNICODE `\u0000` character (same as `\0`)~~
   - No background processing
 - FTS3 and FTS4 are tested working OK in this version branch (for all target platforms in this version branch Android/iOS/macOS)
 - R-Tree is *not* tested or supported for Android in this version branch.
@@ -226,7 +226,7 @@ Issues fixed in some newer version branches:
 - The Android version cannot work with more than 100 open db files (due to the threading model used).
 - UNICODE `\u2028` (line separator) and `\u2029` (paragraph separator) characters are not supported and known to be broken on iOS, macOS, and Android platforms due to JSON issues reported in [Cordova bug CB-9435](https://issues.apache.org/jira/browse/CB-9435) and [cordova/cordova-discuss#57](https://github.com/cordova/cordova-discuss/issues/57). There *may* be a similar issue with certain other UNICODE characters in the iOS/macOS version (needs further investigation). This is fixed for iOS in [litehelpers / cordova-sqlite-evplus-ext-legacy-build-free](https://github.com/litehelpers/cordova-sqlite-evplus-ext-legacy-build-free) and [litehelpers / Cordova-sqlite-evplus-legacy-attach-detach-free](https://github.com/litehelpers/Cordova-sqlite-evplus-legacy-attach-detach-free) (GPL or special commercial license terms) as well as [litehelpers / cordova-sqlite-evmax-ext-workers-legacy-build-free](https://github.com/litehelpers/cordova-sqlite-evmax-ext-workers-legacy-build-free) (GPL or premium commercial license terms).
 - The BLOB data type is not fully supported by this version branch. SELECT BLOB in Base64 format is supported by [litehelpers / cordova-sqlite-ext](https://github.com/litehelpers/cordova-sqlite-ext) (permissive license terms) and [litehelpers / Cordova-sqlite-evcore-extbuild-free](https://github.com/litehelpers/Cordova-sqlite-evcore-extbuild-free) (GPL or commercial license terms).
-- Truncation in case of UNICODE `\u0000` (same as `\0`) character on Android (default Android-sqlite-connector database implementation) and Windows.
+- Truncation in case of UNICODE `\u0000` (same as `\0`) character on Android (default Android-sqlite-connector database implementation) ~~and Windows~~.
 - Case-insensitive matching and other string manipulations on Unicode characters, which is provided by optional ICU integration in the sqlite source and working with recent versions of Android, is not supported for any target platforms.
 - iOS/macOS platform version uses a thread pool but with only one thread working at a time due to "synchronized" database access
 - Some large query results may be slow, also due to the JSON implementation.

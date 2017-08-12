@@ -1,5 +1,9 @@
 # Changes
 
+##### cordova-sqlite-legacy-core 1.0.3-rc1
+
+- Fix to resolve truncation in case of U+0000 character on Windows by @spacepope (J. Hannes Petersen)
+
 ##### cordova-sqlite-legacy-core 1.0.2
 
 - Fix log in case of transaction waiting for open to finish; doc fixes

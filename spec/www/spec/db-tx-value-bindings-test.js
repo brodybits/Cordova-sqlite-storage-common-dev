@@ -253,7 +253,7 @@ var mytests = function() {
 
         test_it(suiteName + ' stores [Unicode] string with \\u0000 correctly', function () {
           if (isWP8) pending('BROKEN on WP(8)'); // [BUG #202] UNICODE characters not working with WP(8)
-          if (isWindows) pending('BROKEN on Windows'); // TBD (truncates on Windows)
+          // if (isWindows) pending('BROKEN on Windows'); // (RESOLVED)
           // XXX BROKEN on Android-sqlite-connector in this version branch:
           if (!isWebSql && !isWindows && isAndroid && !isImpl2) pending('BROKEN on Android-sqlite-connector implementation)');
 
@@ -321,9 +321,8 @@ var mytests = function() {
         }
 
         test_it(suiteName + ' returns [Unicode] string with \\u0000 correctly', function () {
-          if (isWindows) pending('BROKEN on Windows'); // XXX
           if (isWP8) pending('BROKEN on WP(8)'); // [BUG #202] UNICODE characters not working with WP(8)
-          if (isWindows) pending('BROKEN on Windows'); // XXX
+          // if (isWindows) pending('BROKEN on Windows'); // (RESOLVED)
           if (isWebSql && isAndroid) pending('SKIP on Android Web SQL'); // XXX TBD INCONSISTENT RESULTS Android 4 vs 5
 
           stop();

@@ -77,7 +77,7 @@ var mytests = function() {
 
         it(suiteName + ' string encoding test with UNICODE \\u0000', function (done) {
           if (isWP8) pending('BROKEN on WP(8)'); // [BUG #202] UNICODE characters not working with WP(8)
-          if (isWindows) pending('BROKEN on Windows'); // TBD (truncates on Windows)
+          // if (isWindows) pending('BROKEN on Windows'); // (RESOLVED)
           // XXX BROKEN on Android-sqlite-connector in this version branch:
           if (!isWebSql && !isWindows && isAndroid && !isImpl2) pending('BROKEN on Android-sqlite-connector implementation)');
 
