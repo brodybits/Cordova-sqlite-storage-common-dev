@@ -1,8 +1,9 @@
 # Changes
 
-##### cordova-sqlite-legacy-core 1.0.3-rc1
+##### cordova-sqlite-legacy-core 1.0.3
 
 - Fix to resolve truncation in case of U+0000 character on Windows by @spacepope (J. Hannes Petersen)
+- Suppress warnings when building sqlite3.c & PSPDFThreadSafeMutableDictionary.m on iOS/macOS
 
 ##### cordova-sqlite-legacy-core 1.0.2
 
