@@ -257,14 +257,19 @@
         # (does not matter whether it succeeds or fails here).
         # FUTURE TBD a better solution would be to send a special signal or parameter
         # if the database was never opened on the JavaScript side.
-        nextTick =>
-          if not txLocks[@dbname]
-            myfn = (tx) ->
-              tx.addStatement 'ROLLBACK'
-              return
-            @addTransaction new SQLitePluginTransaction @, myfn, null, null, false, false
+        #nextTick =>
+        #  if not txLocks[@dbname]
+        #    myfn = (tx) ->
+        #      tx.addStatement 'ROLLBACK'
+        #      return
+        #    @addTransaction new SQLitePluginTransaction @, myfn, null, null, false, false
 
+        #  cordova.exec opensuccesscb, openerrorcb, "SQLitePlugin", "open", [ @openargs ]
+
+        openStep2 = =>
           cordova.exec opensuccesscb, openerrorcb, "SQLitePlugin", "open", [ @openargs ]
+
+        cordova.exec openStep2, openStep2, 'SQLitePlugin', 'close', [ { path: @dbname } ]
 
       return
 

@@ -1,5 +1,9 @@
 # Changes
 
+##### cordova-sqlite-legacy-core 1.0.4
+
+- New bug 666 workaround: close db before opening (ignore close error)
+
 ##### cordova-sqlite-legacy-core 1.0.3
 
 - Suppress warnings when building sqlite3.c & PSPDFThreadSafeMutableDictionary.m on iOS/macOS
