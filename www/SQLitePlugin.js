@@ -837,27 +837,14 @@
                       SelfTest.finishWithError(errorcb, 'second readTransaction did not finish');
                       return;
                     }
-                    return db.close(function() {
+                    db.close(function() {
                       return SQLiteFactory.deleteDatabase({
                         name: SelfTest.DBNAME,
                         location: 'default'
                       }, successcb, function(cleanup_err) {
-                        if (/Windows /.test(navigator.userAgent) || /IEMobile/.test(navigator.userAgent)) {
-                          console.log("IGNORE CLEANUP (DELETE) ERROR: " + (JSON.stringify(cleanup_err)) + " (Windows/WP8)");
-                          successcb();
-                          return;
-                        }
                         return SelfTest.finishWithError(errorcb, "Cleanup error: " + cleanup_err);
                       });
                     }, function(close_err) {
-                      if (/Windows /.test(navigator.userAgent) || /IEMobile/.test(navigator.userAgent)) {
-                        console.log("IGNORE close ERROR: " + (JSON.stringify(close_err)) + " (Windows/WP8)");
-                        SQLiteFactory.deleteDatabase({
-                          name: SelfTest.DBNAME,
-                          location: 'default'
-                        }, successcb, successcb);
-                        return;
-                      }
                       return SelfTest.finishWithError(errorcb, "close error: " + close_err);
                     });
                   });

@@ -953,21 +953,11 @@
                       # CLEANUP & FINISH:
                       db.close () ->
                         SQLiteFactory.deleteDatabase {name: SelfTest.DBNAME, location: 'default'}, successcb, (cleanup_err)->
-                          # TBD IGNORE THIS ERROR on Windows (and WP8):
-                          if /Windows /.test(navigator.userAgent) or /IEMobile/.test(navigator.userAgent)
-                            console.log "IGNORE CLEANUP (DELETE) ERROR: #{JSON.stringify cleanup_err} (Windows/WP8)"
-                            successcb()
-                            return
                           SelfTest.finishWithError errorcb, "Cleanup error: #{cleanup_err}"
 
                       , (close_err) ->
-                        # TBD IGNORE THIS ERROR on Windows (and WP8):
-                        if /Windows /.test(navigator.userAgent) or /IEMobile/.test(navigator.userAgent)
-                          console.log "IGNORE close ERROR: #{JSON.stringify close_err} (Windows/WP8)"
-                          SQLiteFactory.deleteDatabase {name: SelfTest.DBNAME, location: 'default'}, successcb, successcb
-                          return
                         SelfTest.finishWithError errorcb, "close error: #{close_err}"
-                      # FUTURE TODO: return
+                      return
 
             , (select_err) ->
               SelfTest.finishWithError errorcb, "SELECT error: #{select_err}"
