@@ -1,5 +1,9 @@
 # Changes
 
+## cordova-sqlite-storage 2.1.3-xxx
+
+XXX TBD
+
 ## cordova-sqlite-storage 2.1.2
 
 ##### cordova-sqlite-legacy-core 1.0.4

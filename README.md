@@ -1,6 +1,6 @@
-# Cordova/PhoneGap sqlite storage plugin
+# Cordova/PhoneGap sqlite storage express WIP
 
-Native interface to sqlite in a Cordova/PhoneGap plugin for Android, iOS, macOS, and Windows 10 (UWP), with API similar to HTML5/[Web SQL API](http://www.w3.org/TR/webdatabase/).
+Native interface to sqlite in a Cordova/PhoneGap plugin for Android, iOS, macOS, ~~and Windows 10 (UWP)~~, with API similar to HTML5/[Web SQL API](http://www.w3.org/TR/webdatabase/).
 
 License terms for Android and Windows platform versions: MIT or Apache 2.0
 
@@ -8,13 +8,20 @@ License terms for iOS/macOS platform version: MIT only
 
 ## About this version branch
 
-This is the common version branch which supports the most widely used features and serves as the basis for the other versions.
+EXPERIMENTAL "express" version with builtin sqlite3 libraries for Android/iOS/macOS, no Windows version support
 
-This version branch uses a `before_plugin_install` hook to install sqlite3 library dependencies from `cordova-sqlite-storage-dependencies` via npm.
+XXX BROKEN on Android: selfTest will not pass, NEEDS INVESTIGATION
 
+XXX TODO:
+- Doc needs update
+- not tested on TBD
+- update description in package.json & plugin.xml
+
+<!-- XXX GONE:
 |Android Circle-CI (**full** suite)|iOS Travis-CI (partial suite)|
 |-----------------------|----------------------|
 |[![Circle CI](https://circleci.com/gh/litehelpers/Cordova-sqlite-storage.svg?style=svg)](https://circleci.com/gh/litehelpers/Cordova-sqlite-storage)|[![Build Status](https://travis-ci.org/litehelpers/Cordova-sqlite-storage.svg)](https://travis-ci.org/litehelpers/Cordova-sqlite-storage)|
+ -->
 
 <!-- FUTURE TBD critial bug notices for this version branch -->
 
