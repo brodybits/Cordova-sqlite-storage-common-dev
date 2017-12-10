@@ -1178,8 +1178,8 @@ var mytests = function() {
               });
             }, function (err) {
               console.log("ERROR: " + JSON.stringify(err));
-              // XXX TBD IGNORE delete error on Windows:
-              if (isWindows) return start();
+              // XXX GONE: NO LONGER NEEDED DUE TO NEW BUG 666 WORKAROUND
+              // if (isWindows) return start();
               ok(false, 'error: ' + err);
               start();
             });
