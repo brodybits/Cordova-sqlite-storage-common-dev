@@ -503,7 +503,6 @@
           error: handlerFor(i, false)
 
         tropts.push
-          qid: null # TBD NEEDED to pass @brodybits/Cordova-sql-test-app for some reason
           sql: request.sql
           params: request.params
 
@@ -515,7 +514,6 @@
         for resultIndex in [0 .. result.length-1]
           r = result[resultIndex]
           type = r.type
-          # NOTE: r.qid can be ignored
           res = r.result
 
           q = mycbmap[resultIndex]

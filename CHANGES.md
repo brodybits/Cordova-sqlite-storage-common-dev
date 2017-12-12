@@ -1,5 +1,9 @@
 # Changes
 
+## cordova-sqlite-storage 2.1.4-fix01
+
+- JS remove qid no longer needed
+
 ## cordova-sqlite-storage 2.1.3
 
 ##### cordova-sqlite-legacy-core 1.0.5
